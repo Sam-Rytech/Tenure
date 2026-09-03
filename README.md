@@ -4,9 +4,9 @@ A no-loss prize savings pool where **balances are encrypted** and **odds are wei
 PoolTogether V5's time-weighted model, implemented over ciphertext on the
 [Zama Protocol](https://docs.zama.org/protocol).
 
-> **Status: in development.** Contracts are written, compiling, and passing a full-cycle test in the FHEVM mock
-> environment. Sepolia deployment, the live demo, and the frontend are in progress. Sections below marked _pending_ are
-> not yet true; nothing here claims a result that has not been produced.
+> **Status: contracts live on Sepolia, frontend in progress.** The contracts are deployed, Etherscan-verified, and have
+> completed a full three-participant draw on-chain, with every transaction hash listed below. The web frontend and the
+> demo video are still being built; nothing here claims a result that has not been produced.
 
 ---
 
@@ -182,13 +182,59 @@ cross-contract ACL grants are needed for balances or rungs.
 
 ### Sepolia addresses
 
-_Pending deployment._ Tenure uses Zama's published tokens rather than deploying its own, which also satisfies the
-brief's faucet requirement — judges mint the underlying directly:
+Tenure uses Zama's published tokens rather than deploying its own, which also satisfies the brief's faucet requirement:
+judges mint the underlying directly, then wrap it.
 
-| Contract                 | Address                                      |
-| ------------------------ | -------------------------------------------- |
-| Mock USDC (public mint)  | `0x9b5Cd13b8eFbB58Dc25A05CF411D8056058aDFfF` |
-| cUSDC (ERC-7984 wrapper) | `0x7c5BF43B851c1dff1a4feE8dB225b87f2C223639` |
+| Contract                 | Address                                                                                                                              |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `TenurePool`             | [`0x6c36d9b70954029D66032FEF2A4880b22a53AF9e`](https://sepolia.etherscan.io/address/0x6c36d9b70954029D66032FEF2A4880b22a53AF9e#code) |
+| `PrizeReserve`           | [`0xd8701a0040032f3633E740Ce111dc50C3f84Bc79`](https://sepolia.etherscan.io/address/0xd8701a0040032f3633E740Ce111dc50C3f84Bc79#code) |
+| Mock USDC (public mint)  | [`0x9b5Cd13b8eFbB58Dc25A05CF411D8056058aDFfF`](https://sepolia.etherscan.io/address/0x9b5Cd13b8eFbB58Dc25A05CF411D8056058aDFfF)      |
+| cUSDC (ERC-7984 wrapper) | [`0x7c5BF43B851c1dff1a4feE8dB225b87f2C223639`](https://sepolia.etherscan.io/address/0x7c5BF43B851c1dff1a4feE8dB225b87f2C223639)      |
+
+Both Tenure contracts are verified on Etherscan.
+
+**Deployed timing.** `DRAW_TIMEOUT` and `CLAIM_WINDOW` are both **600 seconds** on this deployment, deliberately short
+so a complete cycle fits inside a demo and judges can click through one themselves. They are constructor parameters, not
+constants; a production deployment would use hours for the stall timeout and days for the claim window.
+
+### A verified draw
+
+One complete three-participant cycle, run on Sepolia. Stakes were 300,000, 200,000 and 500,000 base units, giving ticket
+ranges `[0, 300k)`, `[300k, 500k)` and `[500k, 1M)`.
+
+| Step                       | Transaction                                                                                                         |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Fund the epoch prize       | [`0xb78941e3…`](https://sepolia.etherscan.io/tx/0xb78941e358570955f554e7e070e783cf20a4265ad1ed9ecfefdbd62c59b00be0) |
+| Close the epoch            | [`0x1ab0eed7…`](https://sepolia.etherscan.io/tx/0x1ab0eed76351b8580826c5c4600d7f2d4fa615f76c52ea55b48e0c8ef9ab6f99) |
+| Build the encrypted ladder | [`0x210f5bcf…`](https://sepolia.etherscan.io/tx/0x210f5bcf08a4e3d2a6154eb9709e3d0fb9954a4293ab6413e4a449806187923c) |
+| Publish total, draw `W`    | [`0x7773f189…`](https://sepolia.etherscan.io/tx/0x7773f1894c07966539a81f2799e05fff8fb209c58c532acd2db262bd6d79ce5b) |
+| Publish the winning number | [`0xc47488ba…`](https://sepolia.etherscan.io/tx/0xc47488ba4516f09f68736b3a8ed80c2bd40a39cbcc1cdee3daf98ad98c2df1d9) |
+| Winner claims              | [`0x14dbf9d0…`](https://sepolia.etherscan.io/tx/0x14dbf9d060944ccf696e2be44fc4b2378155b13e777c0f38faadefc56e75b2a9) |
+| Winner banks the prize     | [`0x3c53441b…`](https://sepolia.etherscan.io/tx/0x3c53441b3a226dbeb75da0433ffac678ccc7a195fbf91552dde59b398811b094) |
+
+Published total **1,000,000**. Published winning number **618,870**, which falls in the third range. Decrypting each
+participant's `pendingPrize` gave `0`, `0`, and `1,000,000` — exactly one winner, identifiable only by that participant
+decrypting their own handle. The winner's balance became 1,500,000: their 500,000 stake plus the 1,000,000 prize.
+
+Every transaction from the run, 45 steps in all, is recorded in [`docs/cycle-sepolia.json`](docs/cycle-sepolia.json).
+
+### Reproducing it
+
+```bash
+npx hardhat run scripts/preflight.ts --network sepolia
+```
+
+```bash
+npx hardhat deploy --network sepolia --tags Tenure
+```
+
+```bash
+PLAYERS=3 npx hardhat run scripts/live-cycle.ts --network sepolia
+```
+
+`scripts/live-cycle.ts` doubles as the reference keeper: it fetches each cleartext and KMS proof from the relayer and
+submits both on-chain. It is idempotent, so a run interrupted by a relayer timeout resumes where it stopped.
 
 ## Local setup
 

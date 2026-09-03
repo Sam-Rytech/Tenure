@@ -8,6 +8,8 @@ import { buildDecryptionProof } from "./helpers/decryption";
 
 const PRIZE = 1_000_000n; // 1 cUSDC at 6 decimals
 const OPERATOR_UNTIL = 2_000_000_000; // far-future unix timestamp
+const DRAW_TIMEOUT = 2 * 60 * 60; // 2 hours
+const CLAIM_WINDOW = 3 * 24 * 60 * 60; // 3 days
 
 /** Phase enum, mirroring DrawEngine.Phase. */
 const Phase = {
@@ -29,7 +31,7 @@ async function deployFixture() {
 
   const pool = (await (
     await ethers.getContractFactory("TenurePool")
-  ).deploy(await cusdc.getAddress(), deployer.address)) as TenurePool;
+  ).deploy(await cusdc.getAddress(), deployer.address, DRAW_TIMEOUT, CLAIM_WINDOW)) as TenurePool;
   await pool.waitForDeployment();
 
   const reserve = (await (

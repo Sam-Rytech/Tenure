@@ -1,0 +1,182 @@
+[
+  {
+    "step": "mint underlying (prize)",
+    "hash": "0xa34656dea9f158d6fe0ae10e1772f0d990c7131af540c661cb1a6ea9d31c890a"
+  },
+  {
+    "step": "approve reserve",
+    "hash": "0x969589f94d6512d876655fc3d666b81dd6f54812ec07379fcaf3e93dfb03d8ec"
+  },
+  {
+    "step": "fundEpoch",
+    "hash": "0xb78941e358570955f554e7e070e783cf20a4265ad1ed9ecfefdbd62c59b00be0"
+  },
+  {
+    "step": "p1 mint",
+    "hash": "0x2e17b2f1cdd9bb6d70ebac333e10dfe4bd4d2b609ac490c23e5eef85c22f72e8"
+  },
+  {
+    "step": "p1 approve wrapper",
+    "hash": "0xdc55601099054f5825e572393e71397bfcfa580c24fc443514459027aaf290ee"
+  },
+  {
+    "step": "p1 wrap",
+    "hash": "0x583ce689331cbdc3e08afbdbe4cbef4d3d7d4b00a732a930112e524f254e854d"
+  },
+  {
+    "step": "p1 setOperator",
+    "hash": "0xd4bbf4a90221b1474a812c2b1c46feacafc3c7509b4691e7f76eb520c4db1d11"
+  },
+  {
+    "step": "p1 deposit",
+    "hash": "0x0f85aea8d94a8d9340e40d770c98a199a6efb2df7a7da74550a56771bf1705cc"
+  },
+  {
+    "step": "p2 mint",
+    "hash": "0x18060e404783aa66bac9df1a08d3641f79f15c44776d4c744e9a0ef723483061"
+  },
+  {
+    "step": "p2 approve wrapper",
+    "hash": "0xd038506c79d404b7c256563fec1ae944a6e6b2a952873ebb98be616ee1eb89dc"
+  },
+  {
+    "step": "p2 wrap",
+    "hash": "0x84e51527a8a3d375bf5bf239271fe7f6ec43d17eb49b69b476d0eea7b1e57382"
+  },
+  {
+    "step": "p2 setOperator",
+    "hash": "0x7bdeaf9a4b6ad86edcfe94b43144f183a18d5bf34cd0bbceb95702d93f57361c"
+  },
+  {
+    "step": "prize already funded",
+    "note": "epoch 0"
+  },
+  {
+    "step": "p1 already enrolled",
+    "note": "0x0bBcCC7044797619A862B9e2a3a8f0ca5A965feB"
+  },
+  {
+    "step": "p2 mint",
+    "hash": "0xaaf93a3ddcc43a82c75fc22d3ef1c7c5cd3a891cc7c1a58567cf26d46e7a7919"
+  },
+  {
+    "step": "p2 approve wrapper",
+    "hash": "0x47550c32780ba91f11b38e748ec712330cb50cc19383ee9d1bbd1d99fb1a7d4b"
+  },
+  {
+    "step": "p2 wrap",
+    "hash": "0x0eae5c9c0a47462031126816843e585619a2bd8201ba05122725713a57890511"
+  },
+  {
+    "step": "p2 deposit",
+    "hash": "0x3a758fbbfb3abfee63947d52dc5d4615240e2dce488b5574dedb40cdb6f7bf17"
+  },
+  {
+    "step": "p3 mint",
+    "hash": "0x2b8cc2443388354d80c587a09ab4b8438dd695af6e2e2770ad3ea00b599656c5"
+  },
+  {
+    "step": "p3 approve wrapper",
+    "hash": "0xa80fda1e8fc408ad4f67d23d5bbb2ac4e7c18b8cacf3ea4514204e277caa4395"
+  },
+  {
+    "step": "p3 wrap",
+    "hash": "0x9fc422dd01f9f5de84cb416d1381ae054ee2418d42067b435629739bf9fb984b"
+  },
+  {
+    "step": "p3 setOperator",
+    "hash": "0x3774eb164da31dbbf7f99ca06612be5e12eb2179dd1644a154d6be9eb9bda5d3"
+  },
+  {
+    "step": "p3 deposit",
+    "hash": "0xe4b4c497b6ae79250e2173e07b61b52b4fe38277d65a031bf75b80a6de545288"
+  },
+  {
+    "step": "closeEpoch(0)",
+    "hash": "0xdbf570825d3d23c63a3873c35b40e02d03bf31d4966b1fadea1f4c06aa218a71"
+  },
+  {
+    "step": "buildChunk(0)",
+    "hash": "0x6d991bb80defdb4699cc0df7a83935deb3a734cf3ca6b99a0d7b9e8f0bec755d"
+  },
+  {
+    "step": "submitTotal(0) decrypted",
+    "note": "value=0"
+  },
+  {
+    "step": "submitTotal(0)",
+    "hash": "0x6b9007a6791ed5065edbf7dfb3710b4d1e2cea00f1956a669875f418e7bd1288"
+  },
+  {
+    "step": "zero total, rolled forward",
+    "note": "no eligible participants this epoch"
+  },
+  {
+    "step": "closeEpoch(1)",
+    "hash": "0x1ab0eed76351b8580826c5c4600d7f2d4fa615f76c52ea55b48e0c8ef9ab6f99"
+  },
+  {
+    "step": "buildChunk(1)",
+    "hash": "0x210f5bcf08a4e3d2a6154eb9709e3d0fb9954a4293ab6413e4a449806187923c"
+  },
+  {
+    "step": "submitTotal(1) decrypted",
+    "note": "value=1000000"
+  },
+  {
+    "step": "submitTotal(1)",
+    "hash": "0x7773f1894c07966539a81f2799e05fff8fb209c58c532acd2db262bd6d79ce5b"
+  },
+  {
+    "step": "submitWinner(1) decrypted",
+    "note": "value=618870"
+  },
+  {
+    "step": "submitWinner(1)",
+    "hash": "0xc47488ba4516f09f68736b3a8ed80c2bd40a39cbcc1cdee3daf98ad98c2df1d9"
+  },
+  {
+    "step": "published total",
+    "note": "1000000"
+  },
+  {
+    "step": "published winning number",
+    "note": "618870"
+  },
+  {
+    "step": "p1 claimPrize",
+    "hash": "0x5f6cf6c6e606c89688bf4ec062440298603d08028685dc5327dbc2d396085e94"
+  },
+  {
+    "step": "p1 pendingPrize",
+    "note": "0"
+  },
+  {
+    "step": "p2 claimPrize",
+    "hash": "0x389b5966ca94c75505acefc4b236f6d5d51236955ca4c3a69d0ae61fead29a55"
+  },
+  {
+    "step": "p2 pendingPrize",
+    "note": "0"
+  },
+  {
+    "step": "p3 claimPrize",
+    "hash": "0x14dbf9d060944ccf696e2be44fc4b2378155b13e777c0f38faadefc56e75b2a9"
+  },
+  {
+    "step": "p3 pendingPrize",
+    "note": "1000000"
+  },
+  {
+    "step": "winner",
+    "note": "p3 0x0560c93d72458949dE11602d03550A2d0CCB4B3a"
+  },
+  {
+    "step": "winner withdrawPrize",
+    "hash": "0x3c53441b3a226dbeb75da0433ffac678ccc7a195fbf91552dde59b398811b094"
+  },
+  {
+    "step": "winner balance",
+    "note": "1500000 (stake 500000 + prize 1000000)"
+  }
+]

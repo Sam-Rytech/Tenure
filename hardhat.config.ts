@@ -23,9 +23,9 @@ const config: HardhatUserConfig = {
     deployer: 0,
   },
   etherscan: {
-    apiKey: {
-      sepolia: vars.get("ETHERSCAN_API_KEY", ""),
-    },
+    // Etherscan API V2 takes a single key across all networks. The per-network form the
+    // template shipped targets the V1 endpoint, which is deprecated and now rejects requests.
+    apiKey: vars.get("ETHERSCAN_API_KEY", ""),
   },
   gasReporter: {
     currency: "USD",

@@ -132,10 +132,17 @@ contract TenurePool is DrawEngine {
     /// @notice The reserve has already been wired up.
     error ReserveAlreadySet();
 
-    /// @notice Wire the pool to its token.
-    /// @param token  The ERC-7984 confidential token held by the pool.
-    /// @param admin_ The address permitted to call `setReserve` once.
-    constructor(IERC7984 token, address admin_) {
+    /// @notice Wire the pool to its token and configure its timing windows.
+    /// @param token        The ERC-7984 confidential token held by the pool.
+    /// @param admin_       The address permitted to call `setReserve` once.
+    /// @param drawTimeout_ Seconds a phase may stall before `abortDraw` is permitted.
+    /// @param claimWindow_ Seconds a winner has to claim before the prize may roll forward.
+    constructor(
+        IERC7984 token,
+        address admin_,
+        uint256 drawTimeout_,
+        uint256 claimWindow_
+    ) DrawEngine(drawTimeout_, claimWindow_) {
         TOKEN = token;
         ADMIN = admin_;
         phase = Phase.OPEN;

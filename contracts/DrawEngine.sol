@@ -45,10 +45,15 @@ abstract contract DrawEngine is ZamaEthereumConfig {
     uint16 public constant LADDER_CHUNK = 20;
 
     /// @notice How long a phase may stall before anyone may call `abortDraw`.
-    uint256 public constant DRAW_TIMEOUT = 2 hours;
+    /// @dev    A constructor parameter rather than a constant. A production deployment wants
+    ///         hours, but a testnet demo must complete a whole cycle inside a screen recording,
+    ///         and a hardcoded window would make the contract impossible to demonstrate or
+    ///         iterate on. The deployed values are stated in the README.
+    uint256 public immutable DRAW_TIMEOUT;
 
     /// @notice How long a winner has to claim before the prize may roll forward.
-    uint256 public constant CLAIM_WINDOW = 3 days;
+    /// @dev    Also a parameter, for the same reason. See {DRAW_TIMEOUT}.
+    uint256 public immutable CLAIM_WINDOW;
 
     /// @notice The current phase of the draw machine.
     Phase public phase;
@@ -145,6 +150,14 @@ abstract contract DrawEngine is ZamaEthereumConfig {
     /// @param winningNumber The revealed value.
     /// @param totalTickets  The published total.
     error WinnerOutOfRange(uint64 winningNumber, uint64 totalTickets);
+
+    /// @notice Configure the stall and claim windows.
+    /// @param drawTimeout_ Seconds a phase may stall before `abortDraw` is permitted.
+    /// @param claimWindow_ Seconds a winner has to claim before the prize may roll forward.
+    constructor(uint256 drawTimeout_, uint256 claimWindow_) {
+        DRAW_TIMEOUT = drawTimeout_;
+        CLAIM_WINDOW = claimWindow_;
+    }
 
     /// @notice Restricts a call to a single phase.
     /// @param expected The phase the call requires.
