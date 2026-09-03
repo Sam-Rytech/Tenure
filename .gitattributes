@@ -1,0 +1,8 @@
+# Normalise line endings so prettier (endOfLine: lf) and CI agree across platforms.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.gif binary
+*.wasm binary
+*.pdf binary
