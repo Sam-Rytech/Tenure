@@ -47,8 +47,14 @@ contract TenurePool is DrawEngine {
     /// @notice The confidential token this pool holds (Zama's cUSDC mock on Sepolia).
     IERC7984 public immutable TOKEN;
 
+    /// @notice The address permitted to wire up the reserve exactly once.
+    address public immutable ADMIN;
+
     /// @notice The only address permitted to notify the pool of prize funding.
-    address public immutable RESERVE;
+    /// @dev    Set once by `setReserve` after deployment. The pool and the reserve each need the
+    ///         other's address, so one of the two must be wired up afterwards; doing it here
+    ///         avoids predicting CREATE addresses, which breaks the moment a nonce shifts.
+    address public reserve;
 
     /// @notice Tenure multiplier as a left-shift per tier: [0,1,2,3] gives 1x, 2x, 4x, 8x.
     /// @dev    A **parameter**, not a hardcoded rule. Setting every entry to zero reduces the
@@ -120,14 +126,30 @@ contract TenurePool is DrawEngine {
     /// @notice The participant cap has been reached.
     error PoolFull();
 
-    /// @notice Wire the pool to its token and prize reserve.
-    /// @param token   The ERC-7984 confidential token held by the pool.
-    /// @param reserve The contract permitted to call `notifyPrizeFunded`.
-    constructor(IERC7984 token, address reserve) {
+    /// @notice Caller is not the admin.
+    error NotAdmin();
+
+    /// @notice The reserve has already been wired up.
+    error ReserveAlreadySet();
+
+    /// @notice Wire the pool to its token.
+    /// @param token  The ERC-7984 confidential token held by the pool.
+    /// @param admin_ The address permitted to call `setReserve` once.
+    constructor(IERC7984 token, address admin_) {
         TOKEN = token;
-        RESERVE = reserve;
+        ADMIN = admin_;
         phase = Phase.OPEN;
         phaseEnteredAt = block.timestamp;
+    }
+
+    /// @notice Point the pool at its prize reserve. Callable exactly once.
+    /// @dev    Deliberately one-shot: after wiring, the funding authority is fixed for the life
+    ///         of the contract and cannot be repointed at an attacker-controlled reserve.
+    /// @param  reserve_ The `PrizeReserve` permitted to call `notifyPrizeFunded`.
+    function setReserve(address reserve_) external {
+        if (msg.sender != ADMIN) revert NotAdmin();
+        if (reserve != address(0)) revert ReserveAlreadySet();
+        reserve = reserve_;
     }
 
     // ---------------------------------------------------------------------
@@ -280,7 +302,7 @@ contract TenurePool is DrawEngine {
     /// @param  epoch  The epoch being funded.
     /// @param  amount Prize amount in cUSDC base units.
     function notifyPrizeFunded(uint32 epoch, uint64 amount) external {
-        if (msg.sender != RESERVE) revert NotReserve();
+        if (msg.sender != reserve) revert NotReserve();
         prizeAmount[epoch] += amount;
         prizeFunded[epoch] = true;
         emit PrizeFunded(epoch, amount);

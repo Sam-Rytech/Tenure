@@ -346,6 +346,20 @@ abstract contract DrawEngine is ZamaEthereumConfig {
         return (r.start, r.end);
     }
 
+    /// @notice The encrypted weighted total, publicly decryptable once the ladder completes.
+    /// @dev    The keeper reads this in `TOTAL_PENDING` and feeds it to the SDK's `publicDecrypt`.
+    /// @return total The ciphertext handle.
+    function encryptedTotal() external view returns (euint64 total) {
+        return _runningTotal;
+    }
+
+    /// @notice The encrypted winning number, publicly decryptable once the draw has happened.
+    /// @dev    The keeper reads this in `WINNER_PENDING` and feeds it to the SDK's `publicDecrypt`.
+    /// @return winningNumber The ciphertext handle.
+    function encryptedWinningNumber() external view returns (euint64 winningNumber) {
+        return _encWinningNumber;
+    }
+
     // ---------------------------------------------------------------------
     // Internals
     // ---------------------------------------------------------------------
