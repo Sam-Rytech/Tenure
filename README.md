@@ -180,6 +180,23 @@ Vault) in behind `fundEpoch`.
 `DrawEngine` is an abstract base that `TenurePool` inherits, so every ciphertext lives at a single address and no
 cross-contract ACL grants are needed for balances or rungs.
 
+### Wiring and trust assumptions
+
+The pool and the reserve each need the other's address. Rather than predicting a CREATE2 address — where the prediction
+depends on the bytecode, so any edit to `PrizeReserve` silently shifts it — the pool is deployed first and wired
+afterwards through a one-shot `setReserve`. It fails safe: an unwired pool cannot record a funded prize, and
+`closeEpoch` refuses to run without one, so a half-deployed system simply cannot draw.
+
+The cost is one storage read in `notifyPrizeFunded`, which runs once per epoch, and one trust assumption worth stating
+plainly: **whoever holds `ADMIN` at deployment chooses the reserve.** A malicious reserve could call `notifyPrizeFunded`
+to inflate `prizeAmount` without depositing real cUSDC, leaving the pool unable to pay a winner. `setReserve` is
+one-shot, so this is fixed at deployment and cannot be repointed later, and the deploy script wires it in the same run.
+Verify the wired address before trusting a deployment.
+
+Timing windows are constructor parameters and are validated against `MIN_WINDOW` (60s). A zero claim window would make
+the prize rollable in the same block it becomes claimable, so a winner could never realistically take it; the
+constructor rejects it rather than allowing a deployment nobody could win from.
+
 ### Sepolia addresses
 
 Tenure uses Zama's published tokens rather than deploying its own, which also satisfies the brief's faucet requirement:

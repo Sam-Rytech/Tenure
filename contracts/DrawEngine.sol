@@ -151,10 +151,26 @@ abstract contract DrawEngine is ZamaEthereumConfig {
     /// @param totalTickets  The published total.
     error WinnerOutOfRange(uint64 winningNumber, uint64 totalTickets);
 
+    /// @notice A timing window below `MIN_WINDOW` was supplied at construction.
+    /// @param drawTimeout The rejected stall timeout.
+    /// @param claimWindow The rejected claim window.
+    error InvalidTiming(uint256 drawTimeout, uint256 claimWindow);
+
+    /// @notice Smallest permitted value for either timing window.
+    /// @dev    Guards against a degenerate deployment. With `CLAIM_WINDOW = 0` the claim deadline
+    ///         equals the block that opened it, so `finalizeEpoch` succeeds immediately while
+    ///         `claimPrize` is only reachable inside that one block — the prize would roll
+    ///         forward before any winner could realistically take it. A zero `DRAW_TIMEOUT`
+    ///         likewise lets anyone abort a draw in the same block it entered a phase.
+    uint256 public constant MIN_WINDOW = 60;
+
     /// @notice Configure the stall and claim windows.
     /// @param drawTimeout_ Seconds a phase may stall before `abortDraw` is permitted.
     /// @param claimWindow_ Seconds a winner has to claim before the prize may roll forward.
     constructor(uint256 drawTimeout_, uint256 claimWindow_) {
+        if (drawTimeout_ < MIN_WINDOW || claimWindow_ < MIN_WINDOW) {
+            revert InvalidTiming(drawTimeout_, claimWindow_);
+        }
         DRAW_TIMEOUT = drawTimeout_;
         CLAIM_WINDOW = claimWindow_;
     }

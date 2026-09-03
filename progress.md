@@ -143,8 +143,18 @@ listed it as the first cut; that was backwards.
 
 ### 4 Sep
 
-- **Sepolia cycle tx hashes:**
-- **Blockers:**
+- **Sepolia deployment (live):** TenurePool `0x6c36d9b70954029D66032FEF2A4880b22a53AF9e`, PrizeReserve
+  `0xd8701a0040032f3633E740Ce111dc50C3f84Bc79`. Both Etherscan-verified. Full 3-player draw completed: total 1,000,000,
+  W 618,870, exactly one winner, all 45 steps in `docs/cycle-sepolia.json`.
+- **Three live-only bugs found and fixed:** circular constructor dependency (undeployable); `CLAIM_WINDOW` hardcoded to
+  3 days (undemonstrable); undici 10s connect timeout thrown from a timer callback (killed the process mid-cycle).
+- **Verified, not assumed:** `setGlobalDispatcher` from node_modules undici _does_ control Node 22's built-in fetch —
+  measured 2s/10s/20s against a blackhole address. Node issue #4215 does not apply here.
+- **PENDING REDEPLOY.** The live instance predates the `MIN_WINDOW` constructor guard, so repo source is now ahead of
+  the verified bytecode. Redeploy and re-run the cycle **once**, after the frontend is ready and ETH is topped up, then
+  refresh the README addresses and hashes. Doing it now would waste a deploy.
+- **Blockers:** Sepolia ETH low — 0.017 on the deployer, ~0.009 across helpers. Needs a top-up before the final deploy
+  plus demo re-run.
 
 ### 5 Sep
 
