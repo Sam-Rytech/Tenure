@@ -32,6 +32,7 @@
   --clear: #100e0b; /* near-black. published, verifiable. 18:1 on paper */
   --muted: #5f594f; /* secondary. 6.8:1 */
   --muted-dim: #6f675b; /* tertiary. 5.5:1 — still passes for small text */
+  --muted-strong: #3a342c; /* for small text sitting over the shader field */
 
   /* accent */
   --glow: #8a6318; /* gold for TYPE. 5.3:1 on paper */
@@ -54,6 +55,7 @@
   --color-clear: var(--clear);
   --color-muted: var(--muted);
   --color-muted-dim: var(--muted-dim);
+  --color-muted-strong: var(--muted-strong);
   --color-glow: var(--glow);
   --color-glow-bright: var(--glow-bright);
   --color-glow-dim: var(--glow-dim);
@@ -108,6 +110,18 @@ body {
   font-size: 0.6875rem;
   letter-spacing: 0.2em;
   color: var(--glow);
+}
+
+/*
+ * Small type that sits over the animated field.
+ *
+ * The field can reach full gold under a dust mote or a star streak, and 11px secondary text does
+ * not survive that: measured against the strongest gold the shader produces, --muted lands near
+ * 3.7:1. This token clears 4.6:1 against that worst case and 12:1 against bare paper, so the
+ * field can stay at the strength it looks best at without costing legibility.
+ */
+.over-field {
+  color: var(--muted-strong);
 }
 
 /* ------------------------------------------------------------ surfaces --- */

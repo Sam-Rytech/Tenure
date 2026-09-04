@@ -29,6 +29,9 @@ import { useEffect, useRef } from "react";
  * - No WebGL2, or a lost context, degrades to the flat paper background underneath.
  */
 
+/** A moment with streaks mid-flight, used for the single frame drawn when motion is off. */
+const SEED_TIME = 16;
+
 const VERTEX_SRC = `#version 300 es
 precision mediump float;
 in vec4 position;
@@ -40,6 +43,7 @@ precision mediump float;
 out vec4 O;
 uniform vec2 resolution;
 uniform float time;
+uniform float quality;   // 1.0 desktop, 0.0 phones: drops the second dust layer
 uniform vec3 paper;
 uniform vec3 cream;
 uniform vec3 gold;
@@ -64,7 +68,7 @@ float noise(vec2 p){
   return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
-// Three octaves. Five was imperceptible here once the result is clamped this light.
+// Three octaves. Five was imperceptible once the result is clamped this light.
 float fbm(vec2 p){
   float s = 0.0, a = 0.5;
   for (int i = 0; i < 3; i++){
@@ -73,6 +77,81 @@ float fbm(vec2 p){
     a *= 0.5;
   }
   return s;
+}
+
+/*
+ * Gold dust drifting left.
+ *
+ * A tiled grid holds one mote per cell, so each fragment only inspects its own cell and the eight
+ * around it rather than iterating a particle list. Advancing the sample space to the right makes
+ * the motes travel left; each carries its own wobble so the drift reads as random rather than as
+ * a sheet sliding across.
+ */
+float dust(vec2 uv, float scale, float speed, float t){
+  vec2 p = uv * scale;
+  p.x += t * speed;
+  vec2 cell = floor(p), f = fract(p);
+  float acc = 0.0;
+
+  for (int y = -1; y <= 1; y++){
+    for (int x = -1; x <= 1; x++){
+      vec2 o = vec2(float(x), float(y));
+      vec2 id = cell + o;
+      float r1 = hash(id);
+      float r2 = hash(id + 17.31);
+      vec2 c = o + vec2(r1, r2);
+      c.y += 0.18 * sin(t * (0.25 + r1 * 0.8) + r2 * 6.2831);
+      c.x += 0.10 * cos(t * (0.20 + r2 * 0.6) + r1 * 6.2831);
+      float d = length(f - c);
+      float size = mix(0.020, 0.055, r2);
+      acc += smoothstep(size, 0.0, d) * (0.35 + 0.65 * r1);
+    }
+  }
+  return acc;
+}
+
+/*
+ * Shooting streaks crossing right.
+ *
+ * Each is a short segment with a bright head and a tail trailing behind it. Their vertical paths
+ * are sine waves of different frequency and phase, so the trajectories weave through one another
+ * instead of running parallel.
+ */
+float streaks(vec2 uv, float t){
+  float acc = 0.0;
+
+  for (int i = 0; i < 4; i++){
+    float fi = float(i);
+    float s1 = hash(vec2(fi, 1.7));
+    float s2 = hash(vec2(fi, 9.3));
+    float s3 = hash(vec2(fi, 4.1));
+
+    float speed = 0.055 + 0.045 * s1;
+    float lt = fract(t * speed + s2);          // 0..1 across the field
+    float freq = 1.4 + 2.2 * s3;               // differing weave rates make paths cross
+
+    float x = mix(-1.5, 1.5, lt);
+    float y = mix(-0.48, 0.48, s2) + 0.26 * sin(lt * 6.2831 * freq + s1 * 6.2831);
+
+    // Tangent of the path, so the tail lies along the direction of travel.
+    float dy = 0.26 * 6.2831 * freq * cos(lt * 6.2831 * freq + s1 * 6.2831) / 3.0;
+    vec2 dir = normalize(vec2(1.0, dy));
+
+    float len = 0.30 + 0.20 * s1;
+    vec2 head = vec2(x, y);
+    vec2 tail = head - dir * len;
+
+    vec2 pa = uv - tail, ba = head - tail;
+    float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+    float d = length(pa - ba * h);
+
+    float core = smoothstep(0.0055, 0.0, d) * pow(h, 3.0);
+    float glow = smoothstep(0.032, 0.0, d) * pow(h, 4.0) * 0.55;
+    float fade = smoothstep(0.0, 0.10, lt) * smoothstep(1.0, 0.88, lt);
+
+    acc += (core + glow) * fade;
+  }
+  return acc;
 }
 
 void main(void){
@@ -84,12 +163,18 @@ void main(void){
   float f = fbm(uv * 1.9 + q * 1.5 + t * 0.5);
 
   vec3 col = mix(paper, cream, smoothstep(0.20, 0.70, f));
-  // Gold peaks at a 0.58 blend. Measured against the near-black type token that still leaves
-  // better than 10:1, so the field can carry real presence without touching legibility.
   col = mix(col, gold, smoothstep(0.44, 0.95, f) * 0.58);
-
-  // A second, tighter band gives the veins their edge rather than one flat wash.
   col = mix(col, gold, smoothstep(0.72, 0.99, f) * 0.22);
+
+  // Particles darken toward gold. On a light ground additive glow is invisible, so the motes and
+  // streaks behave like flecks of leaf on paper rather than light in a night sky.
+  float motes = dust(uv, 7.0, 0.045, time);
+  if (quality > 0.5) motes += dust(uv, 11.0, 0.075, time + 40.0) * 0.7;
+  col = mix(col, gold, clamp(motes, 0.0, 1.0) * 0.5);
+
+  vec3 deepGold = gold * 0.82;
+  float streakZone = smoothstep(-0.06, 0.30, uv.y);
+  col = mix(col, deepGold, clamp(streaks(uv, time), 0.0, 1.0) * 0.6 * streakZone);
 
   // Settle back toward flat paper at the edges so the panel has no visible boundary.
   float vignette = smoothstep(1.85, 0.05, length(uv * vec2(0.66, 1.0)));
@@ -174,7 +259,7 @@ class ShaderField {
     gl.enableVertexAttribArray(position);
     gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
 
-    for (const name of ["resolution", "time", "paper", "cream", "gold"]) {
+    for (const name of ["resolution", "time", "quality", "paper", "cream", "gold"]) {
       this.uniforms[name] = gl.getUniformLocation(program, name);
     }
 
@@ -196,6 +281,9 @@ class ShaderField {
     this.gl.viewport(0, 0, width, height);
   }
 
+  /** 1 keeps both dust layers; 0 drops the second, which halves the per-fragment cost. */
+  quality = 1;
+
   render(seconds: number) {
     const { gl, program } = this;
     if (!program) return;
@@ -203,6 +291,7 @@ class ShaderField {
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
     gl.uniform2f(this.uniforms.resolution ?? null, this.canvas.width, this.canvas.height);
     gl.uniform1f(this.uniforms.time ?? null, seconds);
+    gl.uniform1f(this.uniforms.quality ?? null, this.quality);
     gl.uniform3fv(this.uniforms.paper ?? null, this.palette.paper);
     gl.uniform3fv(this.uniforms.cream ?? null, this.palette.cream);
     gl.uniform3fv(this.uniforms.gold ?? null, this.palette.gold);
@@ -248,6 +337,7 @@ export function ShaderBackground({ className = "" }: { className?: string }) {
     const sync = () => {
       const rect = canvas.getBoundingClientRect();
       if (rect.width === 0 || rect.height === 0) return;
+      field.quality = rect.width < 640 ? 0 : 1;
       field.resize(rect.width, rect.height, scaleFor(rect.width));
     };
 
@@ -263,7 +353,7 @@ export function ShaderBackground({ className = "" }: { className?: string }) {
     const start = () => {
       if (running || reduceMotion) return;
       running = true;
-      startedAt = performance.now() - 2000; // begin mid-drift rather than from a flat field
+      startedAt = performance.now() - SEED_TIME * 1000; // continue from the seed frame
       frameRef.current = requestAnimationFrame(loop);
     };
 
@@ -282,11 +372,11 @@ export function ShaderBackground({ className = "" }: { className?: string }) {
 
     sync();
     // Always paint one frame, so reduced-motion users and paused tabs still see the field.
-    field.render(2);
+    field.render(SEED_TIME);
 
     const resizeObserver = new ResizeObserver(() => {
       sync();
-      if (!running) field.render(2);
+      if (!running) field.render(SEED_TIME);
     });
     resizeObserver.observe(canvas);
 

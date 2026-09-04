@@ -92,14 +92,6 @@ export default async function Home() {
             className="pointer-events-none absolute left-1/2 top-0 -z-10 h-full w-screen -translate-x-1/2"
           >
             <ShaderBackground />
-            {/*
-              A uniform veil rather than a directional scrim. The field is decorative and must
-              never sit under small type: measured against the darkest gold the field produces,
-              lifting everything 35% toward paper brings 11px secondary text back above 4.5:1
-              while leaving the marbling clearly visible. A left-weighted gradient was tried
-              first and simply erased the effect.
-            */}
-            <div className="absolute inset-0 bg-[rgba(252,251,248,0.35)]" />
             <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent to-paper" />
           </div>
 
@@ -141,7 +133,7 @@ export default async function Home() {
 
               <div
                 data-hero-proof
-                className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-muted"
+                className="over-field mt-9 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[0.6875rem] uppercase tracking-[0.14em]"
               >
                 <span>Live on Sepolia</span>
                 <span aria-hidden className="text-line-bright">
@@ -162,7 +154,7 @@ export default async function Home() {
             {/* ────────────────────────────────────── live draw panel ── */}
             <section data-hero-panel className="mt-20">
               <div className="flex items-baseline justify-between">
-                <p className="eyebrow">
+                <p className="eyebrow over-field">
                   {state
                     ? `Live · epoch ${state.currentEpoch} · ${PHASE_LABELS[state.phase] ?? "unknown"}`
                     : "Live pool"}
