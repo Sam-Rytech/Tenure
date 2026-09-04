@@ -287,6 +287,21 @@ npx hardhat vars set ETHERSCAN_API_KEY
 npm run deploy:sepolia
 ```
 
+### Deploying the frontend
+
+The repository root is the Hardhat project; the web app lives in `frontend/` with its own `package.json`, lockfile and
+toolchain. On Vercel this means one setting matters:
+
+**Project Settings → Build and Deployment → Root Directory → `frontend`**
+
+`frontend/vercel.json` pins the framework preset to `nextjs`, so the build does not depend on Vercel's auto-detection
+having run against the right directory when the project was first created.
+
+Without it Vercel builds the repository root, finds no `next` dependency and no `build` script, produces no routable
+output, and every path returns a plain-text `NOT_FOUND` from the edge rather than the app's own 404 page. No environment
+variables are required: contract addresses have defaults and the RPC endpoint is public by design, since anything
+prefixed `NEXT_PUBLIC_` is compiled into the browser bundle.
+
 ### Tests
 
 The full-cycle test drives fund → deposit ×3 → close → build ladder → submit total → submit winner → claim → withdraw,
