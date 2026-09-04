@@ -1,38 +1,48 @@
 import type { Metadata } from "next";
-import { Fraunces, Public_Sans, JetBrains_Mono } from "next/font/google";
+import { Bricolage_Grotesque, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
-/** Display: archival authority, with optical sizing so large settings keep their character. */
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
+/** Display: optically sized, characterful without reaching for a serif cliché. */
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
   subsets: ["latin"],
-  axes: ["SOFT", "WONK", "opsz"],
+  display: "swap",
 });
 
-/** Body: drawn for public records, which is exactly this page's job. */
-const publicSans = Public_Sans({
-  variable: "--font-public-sans",
+/** Body: drawn for technical documentation, which is the register this product wants. */
+const plexSans = IBM_Plex_Sans({
+  variable: "--font-plex-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
 });
 
-/** Data: handles, hashes and ciphertext. */
-const jetbrains = JetBrains_Mono({
-  variable: "--font-jetbrains",
+/** Data: ciphertext, handles, hashes, figures. */
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
   subsets: ["latin"],
+  weight: ["400", "500"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Tenure — confidential prize savings",
+  title: "Tenure — hold longer, win quieter",
   description:
-    "A no-loss prize pool where balances stay encrypted and odds rise the longer you hold. Anyone can verify a draw; nobody can identify the winner.",
+    "A confidential prize savings pool on the Zama Protocol. Balances stay encrypted, odds rise the longer you hold, and anyone can verify the draw without learning who won.",
+  openGraph: {
+    title: "Tenure — hold longer, win quieter",
+    description:
+      "Confidential prize savings. Encrypted balances, tenure-weighted odds, a publicly verifiable draw and an unidentifiable winner.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${publicSans.variable} ${jetbrains.variable} h-full antialiased`}
+      className={`${bricolage.variable} ${plexSans.variable} ${plexMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <Providers>{children}</Providers>

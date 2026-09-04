@@ -34,9 +34,9 @@ const FAUCET_AMOUNT = 5_000_000n; // 5 cUSDC
 /** A single labelled row of the position card. */
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-baseline justify-between gap-4 border-t border-ink-line py-3">
+    <div className="flex items-baseline justify-between gap-4 border-t border-line py-3">
       <span className="eyebrow">{label}</span>
-      <span className="font-mono text-sm tabular-nums text-bone">{children}</span>
+      <span className="font-mono text-sm tabular-nums text-clear">{children}</span>
     </div>
   );
 }
@@ -59,15 +59,9 @@ function Button({
       type="button"
       onClick={onClick}
       disabled={disabled || busy}
-      className={[
-        "px-3.5 py-2 text-sm transition-colors rounded-[2px] border",
-        primary
-          ? "border-seal bg-seal text-ink hover:bg-seal-dim hover:border-seal-dim"
-          : "border-ink-line text-bone-dim hover:text-bone hover:border-slate",
-        "disabled:opacity-40 disabled:cursor-not-allowed",
-      ].join(" ")}
+      className={`btn ${primary ? "btn-primary" : "btn-ghost"} text-sm`}
     >
-      {busy ? "Working…" : children}
+      {busy ? "Working\u2026" : children}
     </button>
   );
 }
@@ -77,9 +71,9 @@ function ErrorNote({ error }: { error: unknown }) {
   if (!error) return null;
   const friendly = describeError(error);
   return (
-    <div className="mt-4 rounded-[2px] border border-seal-dim bg-ink-raised p-4">
-      <p className="text-sm text-seal">{friendly.title}</p>
-      <p className="mt-1 text-sm leading-relaxed text-bone-dim">{friendly.action}</p>
+    <div className="mt-4 rounded-[2px] border border-glow-dim bg-raised p-4">
+      <p className="text-sm text-glow">{friendly.title}</p>
+      <p className="mt-1 text-sm leading-relaxed text-muted">{friendly.action}</p>
     </div>
   );
 }
@@ -256,9 +250,9 @@ export function WalletPanel() {
   // --- render -------------------------------------------------------------
   if (!isConnected) {
     return (
-      <section className="mt-16 rule pt-8">
+      <section className="mt-16 hairline pt-8">
         <p className="eyebrow">Your position</p>
-        <p className="mt-4 max-w-prose text-sm leading-relaxed text-bone-dim">
+        <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted">
           Everything above is public and needs no wallet. Connect one to see your own encrypted balance — only you can
           decrypt it.
         </p>
@@ -280,9 +274,9 @@ export function WalletPanel() {
 
   if (onWrongNetwork) {
     return (
-      <section className="mt-16 rule pt-8">
+      <section className="mt-16 hairline pt-8">
         <p className="eyebrow">Wrong network</p>
-        <p className="mt-4 max-w-prose text-sm leading-relaxed text-bone-dim">
+        <p className="mt-4 max-w-prose text-sm leading-relaxed text-muted">
           Tenure runs on Sepolia. Switch networks to continue.
         </p>
         <div className="mt-5">
@@ -298,13 +292,13 @@ export function WalletPanel() {
   const enrolled = accountInfo ? Boolean(accountInfo[2]) : false;
 
   return (
-    <section className="mt-16 rule pt-8">
+    <section className="mt-16 hairline pt-8">
       <div className="flex items-baseline justify-between">
         <p className="eyebrow">Your position</p>
         <button
           type="button"
           onClick={() => disconnect()}
-          className="font-mono text-xs text-slate underline underline-offset-2 hover:text-bone"
+          className="font-mono text-xs text-muted underline underline-offset-2 hover:text-clear"
         >
           {shorten(address ?? "")}
         </button>
@@ -315,22 +309,22 @@ export function WalletPanel() {
           {clearBalance !== undefined ? (
             `${formatUnits6(BigInt(clearBalance as string | bigint))} cUSDC`
           ) : (
-            <span className="text-cipher">●●●●●●</span>
+            <span className="text-muted-dim">●●●●●●</span>
           )}
         </Row>
         <Row label="pending prize">
           {clearPrize !== undefined ? (
             `${formatUnits6(BigInt(clearPrize as string | bigint))} cUSDC`
           ) : (
-            <span className="text-cipher">●●●●●●</span>
+            <span className="text-muted-dim">●●●●●●</span>
           )}
         </Row>
         <Row label="tenure multiplier">{enrolled ? tierLabelForShift(shift) : "—"}</Row>
-        <div className="border-t border-ink-line pt-4">
+        <div className="border-t border-line pt-4">
           <Button busy={revealing || granting} onClick={revealBalances}>
             {clearBalance === undefined ? "Reveal my balance" : "Refresh"}
           </Button>
-          <p className="mt-2 text-xs leading-relaxed text-slate">
+          <p className="mt-2 text-xs leading-relaxed text-muted">
             Signs a decryption request in your wallet. The signature is cached, so this is asked once.
           </p>
         </div>
@@ -355,7 +349,7 @@ export function WalletPanel() {
           value={amount}
           inputMode="decimal"
           onChange={(e) => setAmount(e.target.value)}
-          className="w-28 rounded-[2px] border border-ink-line bg-ink-raised px-3 py-2 font-mono text-sm tabular-nums text-bone"
+          className="w-28 rounded-[2px] border border-line bg-raised px-3 py-2 font-mono text-sm tabular-nums text-clear"
         />
         <Button primary busy={busy} disabled={!isOperator} onClick={() => submitEncrypted("deposit")}>
           Deposit
@@ -375,16 +369,16 @@ export function WalletPanel() {
       </div>
 
       {!isOperator && (
-        <p className="mt-4 max-w-prose text-xs leading-relaxed text-slate">
+        <p className="mt-4 max-w-prose text-xs leading-relaxed text-muted">
           ERC-7984 uses operators rather than ERC-20 approvals. Granting the pool operator rights looks like an approval
           but is a different mechanism, so it is a separate step before your first deposit.
         </p>
       )}
 
       {lastTx && (
-        <p className="mt-4 font-mono text-xs text-slate">
+        <p className="mt-4 font-mono text-xs text-muted">
           last transaction{" "}
-          <a className="text-bone-dim underline underline-offset-2 hover:text-seal" href={txUrl(lastTx)}>
+          <a className="text-muted underline underline-offset-2 hover:text-glow" href={txUrl(lastTx)}>
             {shorten(lastTx, 10, 8)}
           </a>
         </p>

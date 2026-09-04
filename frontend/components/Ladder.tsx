@@ -1,11 +1,14 @@
 /**
- * The ticket ladder: Tenure's whole confidentiality claim in one object.
+ * The ticket ladder, drawn as a long exposure.
  *
- * The axis is public — it runs from 0 to the published weighted total, and the winning number sits
- * at a precise, checkable position on it. The contents are not. Every participant's range lives
- * inside this band as ciphertext, and no boundary is drawn, because no boundary is knowable. That
- * absence is the point: you can confirm exactly where the draw landed and still have no idea whose
- * range it landed in.
+ * The axis is public: it runs from zero to the published weighted total, and the winning number
+ * sits at a precise, checkable position on it. Everything inside the band is not. Each
+ * participant's ticket range lives there as ciphertext, rendered as accumulated light with no
+ * divisions drawn, because no division is knowable.
+ *
+ * The palette carries the argument. The trail is amber, which in this interface always means
+ * encrypted and yours. The marker is bone, which always means published and checkable by anyone.
+ * You can see exactly where the draw landed and still have no idea whose range it landed in.
  */
 
 /** Deterministic glyphs, so the band renders identically on server and client. */
@@ -31,72 +34,86 @@ interface LadderProps {
   winningNumber: bigint;
   drawn: boolean;
   epoch: number | null;
+  /** Compact form drops the caption, for use inside the app shell. */
+  compact?: boolean;
 }
 
-export function Ladder({ total, winningNumber, drawn, epoch }: LadderProps) {
+export function Ladder({ total, winningNumber, drawn, epoch, compact = false }: LadderProps) {
   const hasAxis = total > 0n;
   const position = hasAxis ? Number((winningNumber * 10000n) / total) / 100 : 0;
   const clamped = Math.min(Math.max(position, 0), 100);
-  const glyphs = cipherGlyphs(`${epoch ?? 0}:${total}:${winningNumber}`, 600);
+  const glyphs = cipherGlyphs(`${epoch ?? 0}:${total}:${winningNumber}`, 900);
 
   return (
-    <figure className="mt-10">
-      {/* The marker rail. Kept above the band so the public value never overlaps the private one. */}
-      <div className="relative h-16">
+    <figure className="mt-8">
+      {/* The marker rail sits above the band so the published value never overlaps the private one. */}
+      <div className="relative h-20 sm:h-[5.5rem]">
         {drawn && hasAxis && (
           <div
-            className="marker-drop absolute top-0 -translate-x-1/2 flex flex-col items-center"
+            data-reveal-marker
+            className="absolute bottom-0 flex -translate-x-1/2 flex-col items-center"
             style={{ left: `${clamped}%` }}
           >
-            <span className="font-mono text-[0.6875rem] tracking-widest uppercase text-slate">winning number</span>
-            <span className="font-mono text-lg text-seal tabular-nums leading-tight">
+            <span className="eyebrow whitespace-nowrap !text-[0.625rem]">winning number</span>
+            <span className="mt-1 font-mono text-xl leading-none tabular-nums text-clear sm:text-2xl">
               {winningNumber.toLocaleString("en-US")}
             </span>
-            <span aria-hidden className="mt-1 block h-5 w-px bg-seal" />
-            <span aria-hidden className="block h-2 w-2 rotate-45 -mt-1 bg-seal" />
+            <span aria-hidden className="mt-2 block h-6 w-px bg-clear" />
           </div>
         )}
       </div>
 
-      {/* The encrypted band. No divisions, because none are knowable. */}
+      {/* The exposure. Light accumulated along the axis, unreadable and undivided. */}
       <div
-        className="cipher-band relative overflow-hidden rounded-[2px] border-y border-ink-line bg-ink-raised"
+        className="relative overflow-hidden rounded-[2px] border-y border-line bg-raised"
         role="img"
         aria-label={
           drawn && hasAxis
-            ? `Ticket ladder from 0 to ${total}. The winning number ${winningNumber} lands at ${clamped.toFixed(1)} percent along it. Every participant's range within the band is encrypted.`
+            ? `Ticket ladder from 0 to ${total}. The winning number ${winningNumber} falls at ${clamped.toFixed(1)} percent along the axis. Every participant's range inside the band is encrypted, and no divisions are shown because none can be read.`
             : "Ticket ladder. No draw has been published for this epoch yet."
         }
       >
+        <div aria-hidden className="trail absolute inset-0" />
+
         <p
           aria-hidden
-          className="h-14 select-none break-all px-2 py-2.5 font-mono text-[0.7rem] leading-[1.15] tracking-[0.08em] text-cipher"
+          className="relative h-16 select-none break-all px-2 py-2.5 font-mono text-[0.7rem] leading-[1.2] tracking-[0.1em] text-glow/25 blur-[1.1px] sm:h-20 sm:text-[0.78rem]"
         >
           {glyphs}
         </p>
+
+        {/* The one point in focus. */}
         {drawn && hasAxis && (
-          <span aria-hidden className="absolute inset-y-0 w-px bg-seal" style={{ left: `${clamped}%` }} />
+          <span
+            aria-hidden
+            className="absolute inset-y-0 w-px bg-clear shadow-[0_0_12px_rgba(242,239,232,0.55)]"
+            style={{ left: `${clamped}%` }}
+          />
         )}
       </div>
 
-      {/* The public axis. */}
-      <div className="mt-2 flex items-baseline justify-between font-mono text-[0.6875rem] text-slate tabular-nums">
+      <div className="mt-2.5 flex items-baseline justify-between font-mono text-[0.6875rem] tabular-nums text-muted">
         <span>0</span>
-        <span>{hasAxis ? total.toLocaleString("en-US") : "—"}</span>
+        <span className="text-clear">{hasAxis ? total.toLocaleString("en-US") : "—"}</span>
       </div>
 
-      <figcaption className="mt-4 max-w-prose text-sm leading-relaxed text-bone-dim">
-        {drawn && hasAxis ? (
-          <>
-            The axis is public: {total.toLocaleString("en-US")} weighted tickets, and a winning number anyone can check.
-            The band is every participant&rsquo;s ticket range, held as ciphertext. No divisions are drawn because none
-            can be read — which is why the draw is verifiable and the winner is not identifiable.
-          </>
-        ) : (
-          <>No draw has been published for this epoch yet. Once the ladder is built and the total is revealed, the
-          winning number appears on this axis.</>
-        )}
-      </figcaption>
+      {!compact && (
+        <figcaption className="mt-5 max-w-[62ch] text-[0.9375rem] leading-relaxed text-muted">
+          {drawn && hasAxis ? (
+            <>
+              The axis is public — {total.toLocaleString("en-US")} weighted tickets and a winning number anyone can
+              check. The band is every participant&rsquo;s ticket range, held as ciphertext. No divisions are drawn
+              because none can be read, and that absence is the point: the draw is verifiable and the winner is not
+              identifiable.
+            </>
+          ) : (
+            <>
+              No draw has been published for this epoch yet. Once the ladder is built and the total is revealed, the
+              winning number appears on this axis.
+            </>
+          )}
+        </figcaption>
+      )}
     </figure>
   );
 }

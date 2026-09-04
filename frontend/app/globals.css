@@ -1,116 +1,244 @@
 @import "tailwindcss";
 
 /*
- * Tenure — "sealed ledger".
+ * Tenure — "Long Exposure".
  *
- * The page is a public record whose contents cannot be read. Everything published (the total, the
- * winning number) is set in bone on indigo and marked with a single sealing-wax red. Everything
- * encrypted is rendered in the cipher slate, deliberately illegible rather than merely hidden.
+ * Long-exposure photography resolves what stays still and erases what moves. That is tenure
+ * weighting made visible: a saver who holds becomes defined, a sniper who darts in and out never
+ * resolves at all.
  *
- * The accent is reserved: seal red appears ONLY on published proof. If it is red, anyone can
- * verify it.
+ * The palette carries the confidentiality model rather than decorating it. One rule, kept
+ * ruthlessly:
+ *
+ *   amber  = yours, encrypted, accrued     (your balance, your prize, your tier)
+ *   bone   = published, verifiable         (the weighted total, the winning number)
+ *   slate  = structure and secondary text
+ *
+ * If it glows, only you can read it. If it is bone-white, anyone can check it.
  */
 :root {
-  --ink: #131a2b;
-  --ink-raised: #1a2336;
-  --ink-line: #26314a;
-  --bone: #e8e2d4;
-  --bone-dim: #b9b3a6;
-  --slate: #7c8aa5;
-  --cipher: #3d4a66;
-  --seal: #c8452f;
-  --seal-dim: #8f3222;
+  --night: #0a0f1c;
+  --raised: #121a2b;
+  --raised-2: #172136;
+  --line: #1f2a40;
+  --line-bright: #2c3a56;
+  --clear: #f2efe8;
+  --muted: #7c879c;
+  --muted-dim: #5a6478;
+  --glow: #e9a63f;
+  --glow-dim: #a8742a;
+  --glow-wash: rgba(233, 166, 63, 0.12);
+  --danger: #e2674a;
+
+  --radius: 2px;
+  --radius-pill: 999px;
+
+  /* Spacing scale, density 4/10 — standard marketing rhythm. */
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2rem;
+  --space-5: 3rem;
+  --space-6: 4rem;
+  --space-7: 6rem;
+  --space-8: 8rem;
 }
 
 @theme inline {
-  --color-ink: var(--ink);
-  --color-ink-raised: var(--ink-raised);
-  --color-ink-line: var(--ink-line);
-  --color-bone: var(--bone);
-  --color-bone-dim: var(--bone-dim);
-  --color-slate: var(--slate);
-  --color-cipher: var(--cipher);
-  --color-seal: var(--seal);
-  --color-seal-dim: var(--seal-dim);
+  --color-night: var(--night);
+  --color-raised: var(--raised);
+  --color-raised-2: var(--raised-2);
+  --color-line: var(--line);
+  --color-line-bright: var(--line-bright);
+  --color-clear: var(--clear);
+  --color-muted: var(--muted);
+  --color-muted-dim: var(--muted-dim);
+  --color-glow: var(--glow);
+  --color-glow-dim: var(--glow-dim);
+  --color-danger: var(--danger);
 
-  --font-display: var(--font-fraunces);
-  --font-sans: var(--font-public-sans);
-  --font-mono: var(--font-jetbrains);
+  --font-display: var(--font-bricolage);
+  --font-sans: var(--font-plex-sans);
+  --font-mono: var(--font-plex-mono);
 }
 
-body {
-  background: var(--ink);
-  color: var(--bone);
-  font-family: var(--font-public-sans), ui-sans-serif, system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* Display face, used sparingly and only at large sizes where its wonk reads as intent. */
-.display {
-  font-family: var(--font-fraunces), ui-serif, Georgia, serif;
-  font-optical-sizing: auto;
-  letter-spacing: -0.022em;
-  line-height: 0.98;
-}
-
-/* Small caps label used for section eyebrows. Encodes hierarchy, not decoration. */
-.eyebrow {
-  font-family: var(--font-jetbrains), ui-monospace, monospace;
-  font-size: 0.6875rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--slate);
-}
-
-.rule {
-  border-top: 1px solid var(--ink-line);
-}
-
-/* Focus is always visible; the seal colour doubles as the focus ring. */
-:where(a, button, input, [tabindex]):focus-visible {
-  outline: 2px solid var(--seal);
-  outline-offset: 2px;
-  border-radius: 2px;
-}
-
-/*
- * The ciphertext band. Glyphs settle once on load, then hold: the point is that the data is
- * unreadable, not that it is busy.
- */
-@keyframes settle {
-  from {
-    opacity: 0.25;
-    filter: blur(1.5px);
-  }
-  to {
-    opacity: 1;
-    filter: blur(0);
-  }
-}
-
-.cipher-band {
-  animation: settle 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-/* The marker drops onto its position once, so the eye follows where W landed. */
-@keyframes drop-in {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.marker-drop {
-  animation: drop-in 700ms cubic-bezier(0.22, 1, 0.36, 1) 250ms both;
+html {
+  scroll-behavior: smooth;
+  /* Keep anchored sections clear of the floating nav. */
+  scroll-padding-top: 6rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cipher-band,
-  .marker-drop {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  background: var(--night);
+  color: var(--clear);
+  font-family: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* ---------------------------------------------------------------- type --- */
+
+.display {
+  font-family: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 0.96;
+  font-variation-settings: "opsz" 48;
+}
+
+.eyebrow {
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Section index, e.g. "02". Structural, and the number means something: reading order. */
+.section-index {
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.2em;
+  color: var(--glow);
+}
+
+/* ------------------------------------------------------------ surfaces --- */
+
+.panel {
+  background: var(--raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.hairline {
+  border-top: 1px solid var(--line);
+}
+
+/* ------------------------------------------------------------ controls --- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-pill);
+  padding: 0.75rem 1.375rem;
+  font-size: 0.9375rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease,
+    transform 200ms ease;
+  /* Meets the 44px minimum touch target with the padding above. */
+  min-height: 44px;
+}
+
+.btn-primary {
+  background: var(--glow);
+  color: var(--night);
+  border: 1px solid var(--glow);
+  font-weight: 500;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #f2b558;
+  border-color: #f2b558;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--clear);
+  border: 1px solid var(--line-bright);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  border-color: var(--muted);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Focus is never removed. The amber ring doubles as the accent. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--glow);
+  outline-offset: 2px;
+  border-radius: var(--radius);
+}
+
+/* ------------------------------------------------------------- motion --- */
+
+/*
+ * Entrance animations run through GSAP with gsap.from(), so the DOM renders in its final,
+ * readable state and stays correct without JavaScript. Nothing below hides content by default.
+ */
+
+/* The long-exposure trail: light that accumulated, smeared along the axis. */
+@keyframes trail-drift {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 200% 50%;
+  }
+}
+
+.trail {
+  background-image: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(233, 166, 63, 0.05) 18%,
+    rgba(233, 166, 63, 0.16) 32%,
+    rgba(233, 166, 63, 0.05) 48%,
+    transparent 62%,
+    rgba(233, 166, 63, 0.1) 78%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: trail-drift 22s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trail {
     animation: none;
   }
+}
+
+/* Tenure made literal: low tiers are diffuse, high tiers resolve. */
+.resolve-0 {
+  filter: blur(2.5px);
+  opacity: 0.55;
+}
+.resolve-1 {
+  filter: blur(1.4px);
+  opacity: 0.7;
+}
+.resolve-2 {
+  filter: blur(0.6px);
+  opacity: 0.85;
+}
+.resolve-3 {
+  filter: none;
+  opacity: 1;
+}
+
+/* --------------------------------------------------------- scrollbars --- */
+
+::selection {
+  background: var(--glow);
+  color: var(--night);
 }
