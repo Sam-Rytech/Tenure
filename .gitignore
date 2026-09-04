@@ -26,3 +26,6 @@ yarn.lock
 
 # local scratch
 architecture.md.*.bak
+
+# windows crash dumps
+*.stackdump

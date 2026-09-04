@@ -36,6 +36,9 @@ const config: HardhatUserConfig = {
     hardhat: {
       accounts: {
         mnemonic: MNEMONIC,
+        // The ladder builds in chunks of 20, so testing the boundary needs 21 distinct
+        // depositors. The default of 20 accounts is one short of exercising it.
+        count: 30,
       },
       chainId: 31337,
     },
