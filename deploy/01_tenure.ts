@@ -23,6 +23,14 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 const DRAW_TIMEOUT = Number(process.env.DRAW_TIMEOUT ?? 600); // 10 minutes
 const CLAIM_WINDOW = Number(process.env.CLAIM_WINDOW ?? 600); // 10 minutes
 
+/**
+ * Tenure weighting, as a left-shift per tier: 1x, 2x, 4x, 8x.
+ *
+ * Set TIER_SHIFTS=0,0,0,0 to deploy strict deposit-weighting instead, which is canonical
+ * PoolTogether behaviour and is asserted equivalent in the tests.
+ */
+const TIER_SHIFTS = (process.env.TIER_SHIFTS ?? "0,1,2,3").split(",").map((v) => Number(v.trim()));
+
 /** Zama's published Sepolia deployment. */
 const ZAMA_SEPOLIA = {
   underlying: "0x9b5Cd13b8eFbB58Dc25A05CF411D8056058aDFfF",
@@ -58,7 +66,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const pool = await deploy("TenurePool", {
     from: deployer,
-    args: [cusdc, deployer, DRAW_TIMEOUT, CLAIM_WINDOW],
+    args: [cusdc, deployer, DRAW_TIMEOUT, CLAIM_WINDOW, TIER_SHIFTS],
     log: true,
   });
 
@@ -89,6 +97,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   log(`  TenurePool   ${pool.address}`);
   log(`  PrizeReserve ${reserve.address}`);
   log(`  drawTimeout  ${DRAW_TIMEOUT}s   claimWindow ${CLAIM_WINDOW}s`);
+  log(`  tierShifts   [${TIER_SHIFTS.join(", ")}]`);
 
   // Keep the FHECounter sample out of the way; it is template scaffolding, not part of Tenure.
   await get("TenurePool");

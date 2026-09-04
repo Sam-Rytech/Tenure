@@ -29,9 +29,13 @@ describe("TenurePool timing guards", function () {
     cusdcAddress = await cusdc.getAddress();
   });
 
-  async function deployWith(drawTimeout: number, claimWindow: number) {
+  async function deployWith(
+    drawTimeout: number,
+    claimWindow: number,
+    tierShifts: [number, number, number, number] = [0, 1, 2, 3],
+  ) {
     const factory = await ethers.getContractFactory("TenurePool");
-    return factory.deploy(cusdcAddress, deployer, drawTimeout, claimWindow);
+    return factory.deploy(cusdcAddress, deployer, drawTimeout, claimWindow, tierShifts);
   }
 
   it("rejects a zero claim window", async function () {

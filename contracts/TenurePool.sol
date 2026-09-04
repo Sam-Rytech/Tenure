@@ -56,12 +56,18 @@ contract TenurePool is DrawEngine {
     ///         avoids predicting CREATE addresses, which breaks the moment a nonce shifts.
     address public reserve;
 
+    /// @notice Largest permitted tier shift.
+    /// @dev    The aggregate overflow analysis assumes a worst-case multiplier of 8x. Allowing a
+    ///         larger shift here would silently invalidate that headroom, so the constructor
+    ///         rejects it.
+    uint8 public constant MAX_TIER_SHIFT = 3;
+
     /// @notice Tenure multiplier as a left-shift per tier: [0,1,2,3] gives 1x, 2x, 4x, 8x.
-    /// @dev    A **parameter**, not a hardcoded rule. Setting every entry to zero reduces the
-    ///         contract to strict deposit-weighting — canonical PoolTogether — which closes any
-    ///         question about brief compliance without losing the differentiator. Powers of two
-    ///         are deliberate: scalar `shl` costs 34k HCU against `mul` at 365k.
-    uint8[4] public tierShifts = [0, 1, 2, 3];
+    /// @dev    A genuine **parameter**, set at deployment. Passing [0,0,0,0] reduces the contract
+    ///         to strict deposit-weighting — canonical PoolTogether — which closes any question
+    ///         about brief compliance without losing the differentiator, and is asserted in tests.
+    ///         Powers of two are deliberate: a scalar `shl` costs 34k HCU against `mul` at 365k.
+    uint8[4] public tierShifts;
 
     /// @notice Append-only list of every address that has ever deposited.
     address[] public participants;
@@ -132,17 +138,34 @@ contract TenurePool is DrawEngine {
     /// @notice The reserve has already been wired up.
     error ReserveAlreadySet();
 
-    /// @notice Wire the pool to its token and configure its timing windows.
+    /// @notice The supplied tier shifts exceed `MAX_TIER_SHIFT` or decrease with tenure.
+    /// @param index The offending tier.
+    /// @param value The rejected shift.
+    error InvalidTierShifts(uint8 index, uint8 value);
+
+    /// @notice Wire the pool to its token and configure its timing and weighting.
     /// @param token        The ERC-7984 confidential token held by the pool.
     /// @param admin_       The address permitted to call `setReserve` once.
     /// @param drawTimeout_ Seconds a phase may stall before `abortDraw` is permitted.
     /// @param claimWindow_ Seconds a winner has to claim before the prize may roll forward.
+    /// @param tierShifts_  Left-shift per tenure tier. `[0,1,2,3]` gives 1x/2x/4x/8x;
+    ///                     `[0,0,0,0]` gives strict deposit-weighting.
     constructor(
         IERC7984 token,
         address admin_,
         uint256 drawTimeout_,
-        uint256 claimWindow_
+        uint256 claimWindow_,
+        uint8[4] memory tierShifts_
     ) DrawEngine(drawTimeout_, claimWindow_) {
+        for (uint8 i = 0; i < 4; ++i) {
+            // Odds must never fall as tenure grows, and the shift must stay inside the headroom
+            // the overflow analysis assumes.
+            if (tierShifts_[i] > MAX_TIER_SHIFT || (i > 0 && tierShifts_[i] < tierShifts_[i - 1])) {
+                revert InvalidTierShifts(i, tierShifts_[i]);
+            }
+            tierShifts[i] = tierShifts_[i];
+        }
+
         TOKEN = token;
         ADMIN = admin_;
         phase = Phase.OPEN;
