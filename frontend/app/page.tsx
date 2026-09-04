@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { Ladder } from "@/components/Ladder";
 import { Reveal, HeroChoreography } from "@/components/Reveal";
+import { ShaderBackground } from "@/components/ui/shader-background";
 import { readDrawState, type DrawState } from "@/lib/chain";
 import { ADDRESSES, PHASE_LABELS, addressUrl, formatUnits6, shorten } from "@/lib/config";
 
@@ -81,110 +82,138 @@ export default async function Home() {
 
       <main className="mx-auto w-full max-w-5xl px-5 pb-24 sm:px-8">
         {/* ─────────────────────────────────────────────── 01 hero ── */}
-        <HeroChoreography>
-          <section className="pt-32 sm:pt-40">
-            <p data-hero-eyebrow>
-              <span className="section-index">01</span>
-            <span aria-hidden className="mx-2.5 text-line-bright">·</span>
-            <span className="eyebrow">Confidential prize savings</span>
-            </p>
+        {/*
+          The shader field sits behind the hero only. It breaks out of the max-width column to
+          bleed full width, then fades back into flat paper so the panel has no visible edge.
+        */}
+        <div className="relative">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-0 -z-10 h-full w-screen -translate-x-1/2"
+          >
+            <ShaderBackground />
+            {/*
+              A uniform veil rather than a directional scrim. The field is decorative and must
+              never sit under small type: measured against the darkest gold the field produces,
+              lifting everything 35% toward paper brings 11px secondary text back above 4.5:1
+              while leaving the marbling clearly visible. A left-weighted gradient was tried
+              first and simply erased the effect.
+            */}
+            <div className="absolute inset-0 bg-[rgba(252,251,248,0.35)]" />
+            <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent to-paper" />
+          </div>
 
-            <h1 className="display mt-7 text-[clamp(2.75rem,9vw,5.5rem)]">
-              <span data-hero-line className="block">
-                Hold longer.
-              </span>
-              <span data-hero-line className="block text-muted">
-                Win quieter.
-              </span>
-            </h1>
-
-            <p data-hero-copy className="mt-7 max-w-[54ch] text-[1.0625rem] leading-relaxed text-muted">
-              Deposit into a shared pool and the yield is drawn as a prize. Your balance is stored as ciphertext, your
-              odds rise the longer you hold, and your principal is never locked. Anyone can verify the draw was fair.
-              Nobody can work out who won.
-            </p>
-
-            <div data-hero-actions className="mt-9 flex flex-wrap items-center gap-3">
-              <Link href="/app" className="btn btn-primary">
-                Enter the pool
-                <span aria-hidden>→</span>
-              </Link>
-              <Link href="#how" className="btn btn-ghost">
-                How a draw works
-                <span aria-hidden>↓</span>
-              </Link>
-            </div>
-
-            <div
-              data-hero-proof
-              className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-muted-dim"
-            >
-              <span>Live on Sepolia</span>
-              <span aria-hidden className="text-line-bright">
-                /
-              </span>
-              <span>Etherscan verified</span>
-              <span aria-hidden className="text-line-bright">
-                /
-              </span>
-              <span>33 tests green</span>
-              <span aria-hidden className="text-line-bright">
-                /
-              </span>
-              <span>No wallet needed to audit</span>
-            </div>
-          </section>
-
-          {/* ────────────────────────────────────── live draw panel ── */}
-          <section data-hero-panel className="mt-20">
-            <div className="flex items-baseline justify-between">
-              <p className="eyebrow">
-                {state ? `Live · epoch ${state.currentEpoch} · ${PHASE_LABELS[state.phase] ?? "unknown"}` : "Live pool"}
+          <HeroChoreography>
+            <section className="pt-32 sm:pt-40">
+              <p data-hero-eyebrow>
+                <span className="section-index">01</span>
+                <span aria-hidden className="mx-2.5 text-line-bright">
+                  ·
+                </span>
+                <span className="eyebrow">Confidential prize savings</span>
               </p>
-              <a
-                href={addressUrl(ADDRESSES.pool)}
-                className="font-mono text-[0.6875rem] text-muted underline-offset-4 transition-colors hover:text-glow hover:underline"
-              >
-                Verify on Etherscan
-              </a>
-            </div>
 
-            {readError || !state ? (
-              <div className="panel mt-6 p-6">
-                <p className="eyebrow">Chain unreachable</p>
-                <p className="mt-2.5 max-w-[60ch] text-[0.9375rem] leading-relaxed text-muted">
-                  The public Sepolia endpoint did not respond, so this draw cannot be shown right now. The contracts are
-                  unaffected and the pool is still live. Reload in a moment.
-                </p>
+              <h1 className="display mt-7 text-[clamp(2.75rem,9vw,5.5rem)]">
+                <span data-hero-line className="block">
+                  Hold longer.
+                </span>
+                <span data-hero-line className="block text-muted">
+                  Win quieter.
+                </span>
+              </h1>
+
+              <p data-hero-copy className="mt-7 max-w-[54ch] text-[1.0625rem] leading-relaxed text-muted">
+                Deposit into a shared pool and the yield is drawn as a prize. Your balance is stored as ciphertext, your
+                odds rise the longer you hold, and your principal is never locked. Anyone can verify the draw was fair.
+                Nobody can work out who won.
+              </p>
+
+              <div data-hero-actions className="mt-9 flex flex-wrap items-center gap-3">
+                <Link href="/app" className="btn btn-primary">
+                  Enter the pool
+                  <span aria-hidden>→</span>
+                </Link>
+                <Link href="#how" className="btn btn-ghost">
+                  How a draw works
+                  <span aria-hidden>↓</span>
+                </Link>
               </div>
-            ) : (
-              <>
-                <Ladder
-                  total={state.totalTickets}
-                  winningNumber={state.winningNumber}
-                  drawn={drawn}
-                  epoch={state.drawnEpoch}
-                />
 
-                <dl className="mt-12 grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-4">
-                  <Stat
-                    label="weighted total"
-                    value={state.totalTickets > 0n ? state.totalTickets.toLocaleString("en-US") : "—"}
+              <div
+                data-hero-proof
+                className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-muted"
+              >
+                <span>Live on Sepolia</span>
+                <span aria-hidden className="text-line-bright">
+                  /
+                </span>
+                <span>Etherscan verified</span>
+                <span aria-hidden className="text-line-bright">
+                  /
+                </span>
+                <span>33 tests green</span>
+                <span aria-hidden className="text-line-bright">
+                  /
+                </span>
+                <span>No wallet needed to audit</span>
+              </div>
+            </section>
+
+            {/* ────────────────────────────────────── live draw panel ── */}
+            <section data-hero-panel className="mt-20">
+              <div className="flex items-baseline justify-between">
+                <p className="eyebrow">
+                  {state
+                    ? `Live · epoch ${state.currentEpoch} · ${PHASE_LABELS[state.phase] ?? "unknown"}`
+                    : "Live pool"}
+                </p>
+                <a
+                  href={addressUrl(ADDRESSES.pool)}
+                  className="font-mono text-[0.6875rem] text-muted underline-offset-4 transition-colors hover:text-glow hover:underline"
+                >
+                  Verify on Etherscan
+                </a>
+              </div>
+
+              {readError || !state ? (
+                <div className="panel mt-6 p-6">
+                  <p className="eyebrow">Chain unreachable</p>
+                  <p className="mt-2.5 max-w-[60ch] text-[0.9375rem] leading-relaxed text-muted">
+                    The public Sepolia endpoint did not respond, so this draw cannot be shown right now. The contracts
+                    are unaffected and the pool is still live. Reload in a moment.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <Ladder
+                    total={state.totalTickets}
+                    winningNumber={state.winningNumber}
+                    drawn={drawn}
+                    epoch={state.drawnEpoch}
                   />
-                  <Stat label="winning number" value={drawn ? state.winningNumber.toLocaleString("en-US") : "—"} />
-                  <Stat label="prize pool" value={`${formatUnits6(state.prizeAmount)} cUSDC`} tone="glow" />
-                  <Stat label="savers" value={state.participantCount.toString()} />
-                </dl>
-              </>
-            )}
-          </section>
-        </HeroChoreography>
+
+                  <dl className="mt-12 grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-4">
+                    <Stat
+                      label="weighted total"
+                      value={state.totalTickets > 0n ? state.totalTickets.toLocaleString("en-US") : "—"}
+                    />
+                    <Stat label="winning number" value={drawn ? state.winningNumber.toLocaleString("en-US") : "—"} />
+                    <Stat label="prize pool" value={`${formatUnits6(state.prizeAmount)} cUSDC`} tone="glow" />
+                    <Stat label="savers" value={state.participantCount.toString()} />
+                  </dl>
+                </>
+              )}
+            </section>
+          </HeroChoreography>
+        </div>
 
         {/* ──────────────────────────────────────── 02 the problem ── */}
         <Reveal as="section" className="mt-32 sm:mt-40">
           <p>
             <span className="section-index">02</span>
-            <span aria-hidden className="mx-2.5 text-line-bright">·</span>
+            <span aria-hidden className="mx-2.5 text-line-bright">
+              ·
+            </span>
             <span className="eyebrow">The problem</span>
           </p>
           <h2 className="display mt-6 max-w-[18ch] text-[clamp(2rem,5vw,3.25rem)]">
@@ -208,7 +237,9 @@ export default async function Home() {
         <Reveal as="section" id="how" className="mt-28 scroll-mt-28 sm:mt-36">
           <p>
             <span className="section-index">03</span>
-            <span aria-hidden className="mx-2.5 text-line-bright">·</span>
+            <span aria-hidden className="mx-2.5 text-line-bright">
+              ·
+            </span>
             <span className="eyebrow">How a draw works</span>
           </p>
           <h2 className="display mt-6 max-w-[20ch] text-[clamp(2rem,5vw,3.25rem)]">
@@ -243,12 +274,12 @@ export default async function Home() {
         <Reveal as="section" id="privacy" className="mt-28 scroll-mt-28 sm:mt-36">
           <p>
             <span className="section-index">04</span>
-            <span aria-hidden className="mx-2.5 text-line-bright">·</span>
+            <span aria-hidden className="mx-2.5 text-line-bright">
+              ·
+            </span>
             <span className="eyebrow">What stays private</span>
           </p>
-          <h2 className="display mt-6 max-w-[20ch] text-[clamp(2rem,5vw,3.25rem)]">
-            The boundary, stated plainly.
-          </h2>
+          <h2 className="display mt-6 max-w-[20ch] text-[clamp(2rem,5vw,3.25rem)]">The boundary, stated plainly.</h2>
           <p className="mt-6 max-w-[62ch] text-[0.9375rem] leading-relaxed text-muted">
             Confidentiality claims are easy to make and hard to keep once money moves. This is the exact line, including
             the parts that are less flattering.
@@ -290,12 +321,12 @@ export default async function Home() {
         <Reveal as="section" className="mt-28 sm:mt-36">
           <p>
             <span className="section-index">05</span>
-            <span aria-hidden className="mx-2.5 text-line-bright">·</span>
+            <span aria-hidden className="mx-2.5 text-line-bright">
+              ·
+            </span>
             <span className="eyebrow">Tenure</span>
           </p>
-          <h2 className="display mt-6 max-w-[20ch] text-[clamp(2rem,5vw,3.25rem)]">
-            Odds that come into focus.
-          </h2>
+          <h2 className="display mt-6 max-w-[20ch] text-[clamp(2rem,5vw,3.25rem)]">Odds that come into focus.</h2>
           <p className="mt-6 max-w-[62ch] text-[0.9375rem] leading-relaxed text-muted">
             Encryption removes what the sniper reads. Tenure removes what they read it for. Hold across an epoch
             boundary and your odds double; hold four and they are eight times what they started at. Any deposit or
@@ -320,7 +351,9 @@ export default async function Home() {
         <Reveal as="section" stagger className="mt-28 sm:mt-36">
           <p>
             <span className="section-index">06</span>
-            <span aria-hidden className="mx-2.5 text-line-bright">·</span>
+            <span aria-hidden className="mx-2.5 text-line-bright">
+              ·
+            </span>
             <span className="eyebrow">Built like infrastructure</span>
           </p>
           <h2 className="display mt-6 max-w-[22ch] text-[clamp(2rem,5vw,3.25rem)]">
