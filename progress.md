@@ -148,11 +148,20 @@ listed it as the first cut; that was backwards.
   W 618,870, exactly one winner, all 45 steps in `docs/cycle-sepolia.json`.
 - **Three live-only bugs found and fixed:** circular constructor dependency (undeployable); `CLAIM_WINDOW` hardcoded to
   3 days (undemonstrable); undici 10s connect timeout thrown from a timer callback (killed the process mid-cycle).
-- **Verified, not assumed:** `setGlobalDispatcher` from node_modules undici _does_ control Node 22's built-in fetch —
+- **Verified, not assumed:** `setGlobalDispatcher` from node*modules undici \_does* control Node 22's built-in fetch —
   measured 2s/10s/20s against a blackhole address. Node issue #4215 does not apply here.
 - **PENDING REDEPLOY.** The live instance predates the `MIN_WINDOW` constructor guard, so repo source is now ahead of
   the verified bytecode. Redeploy and re-run the cycle **once**, after the frontend is ready and ETH is topped up, then
   refresh the README addresses and hashes. Doing it now would waste a deploy.
+- **Frontend built.** Next.js 16 + wagmi + @zama-fhe/react-sdk in `frontend/`. Production build passes. The draw-audit
+  surface is a React Server Component reading Sepolia directly, so it renders with no wallet and no JS — the signature
+  feature is the ticket ladder: a public axis with the winning number marked, over an unreadable ciphertext band with no
+  divisions drawn, because none are knowable.
+- **WASM risk was overstated.** SDK v3 loads FHE crypto from Zama's CDN in a Web Worker rather than bundling
+  `tfhe_bg.wasm`, so the Webpack failure mode R3 feared does not apply. Zama's own template is Next.js.
+- **Local dev cannot reach the chain**: the sandboxed dev-server process has no outbound network (a bare `fetch` to the
+  RPC fails, while the same fetch works from plain node). Verified the viem client works standalone. Expect it to work
+  on Vercel; confirm there.
 - **Blockers:** Sepolia ETH low — 0.017 on the deployer, ~0.009 across helpers. Needs a top-up before the final deploy
   plus demo re-run.
 

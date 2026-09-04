@@ -21,6 +21,8 @@ export default tseslint.config(
       "*.env",
       "*.log",
       "coverage.json",
+      // The Next.js app has its own eslint config and TypeScript project.
+      "frontend/**",
     ],
   },
   eslint.configs.recommended,

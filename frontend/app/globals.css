@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+/*
+ * Tenure — "sealed ledger".
+ *
+ * The page is a public record whose contents cannot be read. Everything published (the total, the
+ * winning number) is set in bone on indigo and marked with a single sealing-wax red. Everything
+ * encrypted is rendered in the cipher slate, deliberately illegible rather than merely hidden.
+ *
+ * The accent is reserved: seal red appears ONLY on published proof. If it is red, anyone can
+ * verify it.
+ */
+:root {
+  --ink: #131a2b;
+  --ink-raised: #1a2336;
+  --ink-line: #26314a;
+  --bone: #e8e2d4;
+  --bone-dim: #b9b3a6;
+  --slate: #7c8aa5;
+  --cipher: #3d4a66;
+  --seal: #c8452f;
+  --seal-dim: #8f3222;
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-ink-raised: var(--ink-raised);
+  --color-ink-line: var(--ink-line);
+  --color-bone: var(--bone);
+  --color-bone-dim: var(--bone-dim);
+  --color-slate: var(--slate);
+  --color-cipher: var(--cipher);
+  --color-seal: var(--seal);
+  --color-seal-dim: var(--seal-dim);
+
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-public-sans);
+  --font-mono: var(--font-jetbrains);
+}
+
+body {
+  background: var(--ink);
+  color: var(--bone);
+  font-family: var(--font-public-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Display face, used sparingly and only at large sizes where its wonk reads as intent. */
+.display {
+  font-family: var(--font-fraunces), ui-serif, Georgia, serif;
+  font-optical-sizing: auto;
+  letter-spacing: -0.022em;
+  line-height: 0.98;
+}
+
+/* Small caps label used for section eyebrows. Encodes hierarchy, not decoration. */
+.eyebrow {
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--slate);
+}
+
+.rule {
+  border-top: 1px solid var(--ink-line);
+}
+
+/* Focus is always visible; the seal colour doubles as the focus ring. */
+:where(a, button, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--seal);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/*
+ * The ciphertext band. Glyphs settle once on load, then hold: the point is that the data is
+ * unreadable, not that it is busy.
+ */
+@keyframes settle {
+  from {
+    opacity: 0.25;
+    filter: blur(1.5px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+.cipher-band {
+  animation: settle 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* The marker drops onto its position once, so the eye follows where W landed. */
+@keyframes drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.marker-drop {
+  animation: drop-in 700ms cubic-bezier(0.22, 1, 0.36, 1) 250ms both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cipher-band,
+  .marker-drop {
+    animation: none;
+  }
+}
