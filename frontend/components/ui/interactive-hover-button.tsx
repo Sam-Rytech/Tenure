@@ -82,8 +82,12 @@ const InteractiveHoverButton = React.forwardRef<HTMLButtonElement, InteractiveHo
         <span
           aria-hidden
           className={cn(
-            "pointer-events-none absolute left-3 top-1/2 z-10 h-10 w-10 -translate-y-1/2 scale-0 rounded-full",
-            "transition-transform duration-[400ms] ease-out group-hover:scale-[5]",
+            // Sized as a proportion of the button, never in pixels. A fixed circle with a fixed
+            // scale factor only ever covers the one button it was tuned against and falls short
+            // on anything wider. At 240% of the box, centred on the left edge, the radius always
+            // exceeds the remaining width whatever the label says.
+            "pointer-events-none absolute left-0 top-1/2 z-10 h-[240%] w-[240%] -translate-x-1/2 -translate-y-1/2",
+            "scale-0 rounded-full transition-transform duration-[420ms] ease-out group-hover:scale-100",
             "motion-reduce:transition-none",
             flood[variant],
           )}

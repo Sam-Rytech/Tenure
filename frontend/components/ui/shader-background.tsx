@@ -110,66 +110,49 @@ float dust(vec2 uv, float scale, float speed, float t){
   return acc;
 }
 
-/** Position along a streak's path at normalized time u. Two harmonics keep the weave organic. */
-vec2 streakPath(float u, float s1, float s2, float freq){
-  float x = mix(-1.55, 1.55, u);
-  float a = u * 6.2831 * freq + s1 * 6.2831;
-  float y = mix(-0.46, 0.46, s2)
-          + 0.24 * sin(a)
-          + 0.085 * sin(a * 2.3 + s2 * 6.2831);
-  return vec2(x, y);
-}
-
 /*
- * Shooting streaks crossing right.
+ * Shooting stars.
  *
- * The trail follows the trajectory rather than approximating it. An earlier version drew one
- * straight segment from head to tail, so as the path curved the whole segment simply rotated and
- * the streak read as a rigid line pivoting rather than a comet flowing along its own arc. Here
- * the path is sampled at six points behind the head and drawn as a polyline, so the tail bends
- * through the same curve the head just travelled.
+ * A meteor travels dead straight and fast. The trail is a taper behind the head, not a path that
+ * bends: an earlier version curved each trail along a sine, which read as a snake rather than a
+ * meteor. The intertwining comes from several stars on differing straight headings crossing one
+ * another, which is also how it looks in the sky, not from any single one weaving.
  *
- * Each streak weaves on two harmonics of differing frequency and phase, so trajectories cross
- * rather than run parallel.
+ * Cheaper than the curved version too: one segment per star instead of a five-segment polyline.
  */
-float streaks(vec2 uv, float t){
+float meteors(vec2 uv, float t){
   float acc = 0.0;
 
-  for (int i = 0; i < 3; i++){
+  for (int i = 0; i < 4; i++){
     float fi = float(i);
     float s1 = hash(vec2(fi, 1.7));
     float s2 = hash(vec2(fi, 9.3));
     float s3 = hash(vec2(fi, 4.1));
 
-    float speed = 0.050 + 0.040 * s1;
-    float lt = fract(t * speed + s2);
-    float fade = smoothstep(0.0, 0.10, lt) * smoothstep(1.0, 0.86, lt);
-    if (fade <= 0.002) continue;
+    // A modest spread of headings, all rightward, so the paths cross rather than run parallel.
+    float ang = mix(-0.40, 0.28, s3);
+    vec2 dir = vec2(cos(ang), sin(ang));
 
-    float freq = 0.9 + 1.6 * s3;
-    float span = 0.15 + 0.09 * s1;   // how far back the trail reaches, in path time
+    float speed = 0.15 + 0.11 * s1;
+    float cycle = fract(t * speed + s2);
 
-    // Sample once, reuse for every segment: six path evaluations rather than ten.
-    vec2 pts[6];
-    for (int k = 0; k < 6; k++){
-      pts[k] = streakPath(lt - float(k) / 5.0 * span, s1, s2, freq);
-    }
+    vec2 start = vec2(-1.9, mix(-0.50, 0.60, s2));
+    vec2 head = start + dir * (cycle * 3.9);
 
-    for (int k = 0; k < 5; k++){
-      vec2 a = pts[k], b = pts[k + 1];
-      vec2 pa = uv - a, ba = b - a;
-      float h = clamp(dot(pa, ba) / max(dot(ba, ba), 1e-6), 0.0, 1.0);
-      float d = length(pa - ba * h);
+    float len = 0.40 + 0.26 * s1;
+    vec2 tail = head - dir * len;
 
-      float along = (float(k) + h) / 5.0;   // 0 at the head, 1 at the tip of the tail
-      float taper = 1.0 - along;
+    vec2 pa = uv - tail, ba = head - tail;
+    float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+    float d = length(pa - ba * h);
 
-      // A comet: a tight bright head that widens and dims as it trails.
-      float core = smoothstep(0.0045 * taper + 0.0009, 0.0, d) * taper * taper;
-      float glow = smoothstep(0.011 + 0.030 * along, 0.0, d) * taper * 0.45;
+    // h runs 0 at the tip of the tail to 1 at the head, so the streak narrows and dims behind it.
+    float w = mix(0.0015, 0.0072, h);
+    float core = smoothstep(w, 0.0, d) * pow(h, 2.2);
+    float glow = smoothstep(w * 5.0 + 0.0045, 0.0, d) * pow(h, 3.0) * 0.5;
 
-      acc += (core + glow) * fade;
-    }
+    float fade = smoothstep(0.0, 0.05, cycle) * smoothstep(1.0, 0.92, cycle);
+    acc += (core + glow) * fade;
   }
   return acc;
 }
@@ -188,13 +171,13 @@ void main(void){
 
   // Particles darken toward gold. On a light ground additive glow is invisible, so the motes and
   // streaks behave like flecks of leaf on paper rather than light in a night sky.
-  float motes = dust(uv, 7.0, 0.045, time);
-  if (quality > 0.5) motes += dust(uv, 11.0, 0.075, time + 40.0) * 0.7;
-  col = mix(col, gold, clamp(motes, 0.0, 1.0) * 0.5);
+  float motes = dust(uv, 9.5, 0.10, time);
+  if (quality > 0.5) motes += dust(uv, 15.0, 0.16, time + 40.0) * 0.75;
+  col = mix(col, gold, clamp(motes, 0.0, 1.0) * 0.55);
 
   vec3 deepGold = gold * 0.82;
   float streakZone = smoothstep(-0.06, 0.30, uv.y);
-  col = mix(col, deepGold, clamp(streaks(uv, time), 0.0, 1.0) * 0.6 * streakZone);
+  col = mix(col, deepGold, clamp(meteors(uv, time), 0.0, 1.0) * 0.6 * streakZone);
 
   // Settle back toward flat paper at the edges so the panel has no visible boundary.
   float vignette = smoothstep(1.85, 0.05, length(uv * vec2(0.66, 1.0)));
