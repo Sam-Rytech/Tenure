@@ -28,14 +28,35 @@ function Step({ index, title, children }: { index: string; title: string; childr
   );
 }
 
-/** Tenure made visible: low tiers are diffuse, high tiers resolve into focus. */
-function TierRow({ tier, held, multiplier, blur }: { tier: string; held: string; multiplier: string; blur: string }) {
+/**
+ * Tenure made visible: low tiers are diffuse, high tiers resolve into focus.
+ *
+ * The blur is applied to a decorative bar, never to the multiplier itself. Fading or blurring the
+ * value would put real content below the contrast floor — gold at reduced opacity on paper lands
+ * around 3:1 — and no amount of tuning fixes that while still reading as "unresolved". The bar
+ * carries the metaphor; the number stays fully legible.
+ */
+function TierRow({
+  tier,
+  held,
+  multiplier,
+  odds,
+  blur,
+}: {
+  tier: string;
+  held: string;
+  multiplier: string;
+  /** Bar width as a percentage, proportional to the multiplier. */
+  odds: number;
+  blur: string;
+}) {
   return (
     <div className="flex items-center gap-4 border-t border-line py-4 sm:gap-6">
       <span className="w-10 shrink-0 font-mono text-[0.6875rem] text-muted-dim">{tier}</span>
-      <span className="w-28 shrink-0 text-sm text-muted sm:w-40">{held}</span>
-      <span className={`font-mono text-2xl tabular-nums text-glow transition-all sm:text-3xl ${blur}`}>
-        {multiplier}
+      <span className="w-24 shrink-0 text-sm text-muted sm:w-40">{held}</span>
+      <span className="w-14 shrink-0 font-mono text-2xl tabular-nums text-glow sm:text-3xl">{multiplier}</span>
+      <span aria-hidden className="hidden min-w-0 flex-1 sm:block">
+        <span className={`block h-2 rounded-[1px] bg-glow-bright ${blur}`} style={{ width: `${odds}%` }} />
       </span>
     </div>
   );
@@ -282,10 +303,10 @@ export default async function Home() {
           </p>
 
           <div className="mt-12">
-            <TierRow tier="tier 0" held="new this epoch" multiplier="1×" blur="resolve-0" />
-            <TierRow tier="tier 1" held="held one epoch" multiplier="2×" blur="resolve-1" />
-            <TierRow tier="tier 2" held="held two to three" multiplier="4×" blur="resolve-2" />
-            <TierRow tier="tier 3" held="held four or more" multiplier="8×" blur="resolve-3" />
+            <TierRow tier="tier 0" held="new this epoch" multiplier="1×" odds={12.5} blur="resolve-0" />
+            <TierRow tier="tier 1" held="held one epoch" multiplier="2×" odds={25} blur="resolve-1" />
+            <TierRow tier="tier 2" held="held two to three" multiplier="4×" odds={50} blur="resolve-2" />
+            <TierRow tier="tier 3" held="held four or more" multiplier="8×" odds={100} blur="resolve-3" />
           </div>
 
           <p className="mt-8 max-w-[62ch] text-[0.9375rem] leading-relaxed text-muted">

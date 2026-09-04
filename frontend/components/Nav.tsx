@@ -27,7 +27,7 @@ export function Nav({ cta = { href: "/app", label: "Enter the pool" } }: { cta?:
           "mx-auto flex max-w-5xl items-center justify-between gap-4 rounded-[999px] border px-4 py-2.5 sm:px-5",
           "transition-[background-color,border-color,backdrop-filter] duration-300",
           condensed
-            ? "border-line bg-[rgba(10,15,28,0.72)] backdrop-blur-xl"
+            ? "border-line bg-[rgba(252,251,248,0.78)] backdrop-blur-xl"
             : "border-transparent bg-transparent",
         ].join(" ")}
       >

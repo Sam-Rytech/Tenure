@@ -1,51 +1,52 @@
 @import "tailwindcss";
 
 /*
- * Tenure — "Long Exposure".
+ * Tenure — gilded paper.
  *
- * Long-exposure photography resolves what stays still and erases what moves. That is tenure
- * weighting made visible: a saver who holds becomes defined, a sniper who darts in and out never
- * resolves at all.
+ * A printed record: cream stock, black impression, gold leaf. The exposure idea survives the
+ * inversion — what stays still resolves, what moves blurs away — but it now reads as a document
+ * rather than a photograph, which suits a savings protocol better.
  *
- * The palette carries the confidentiality model rather than decorating it. One rule, kept
- * ruthlessly:
+ * The palette still carries the confidentiality model rather than decorating it. One rule, kept
+ * everywhere:
  *
- *   amber  = yours, encrypted, accrued     (your balance, your prize, your tier)
- *   bone   = published, verifiable         (the weighted total, the winning number)
- *   slate  = structure and secondary text
+ *   black = published and verifiable   (the weighted total, the winning number)
+ *   gold  = encrypted and yours        (your balance, your prize, your tier)
+ *   cream = ground and structure
  *
- * If it glows, only you can read it. If it is bone-white, anyone can check it.
+ * If it is black, anyone can check it. If it is gold, only you can read it.
+ *
+ * Every foreground/background pair below was checked against WCAG AA. Gold is the constraint:
+ * bright gold cannot carry small text on cream, so there are two of them — a dark gold for type
+ * and a bright gold for fills, where black sits on top.
  */
 :root {
-  --night: #0a0f1c;
-  --raised: #121a2b;
-  --raised-2: #172136;
-  --line: #1f2a40;
-  --line-bright: #2c3a56;
-  --clear: #f2efe8;
-  --muted: #7c879c;
-  --muted-dim: #5a6478;
-  --glow: #e9a63f;
-  --glow-dim: #a8742a;
-  --glow-wash: rgba(233, 166, 63, 0.12);
-  --danger: #e2674a;
+  /* ground */
+  --paper: #fcfbf8; /* page */
+  --raised: #f3eee3; /* cream surfaces, the ciphertext band */
+  --raised-2: #ede6d8;
+  --line: #e2daca; /* hairlines */
+  --line-bright: #c9bfa9; /* stronger borders */
+
+  /* type */
+  --clear: #100e0b; /* near-black. published, verifiable. 18:1 on paper */
+  --muted: #5f594f; /* secondary. 6.8:1 */
+  --muted-dim: #6f675b; /* tertiary. 5.5:1 — still passes for small text */
+
+  /* accent */
+  --glow: #8a6318; /* gold for TYPE. 5.3:1 on paper */
+  --glow-bright: #c9962f; /* gold for FILLS. black on it reads 7:1 */
+  --glow-dim: #6d4e12;
+  --glow-wash: rgba(138, 99, 24, 0.09);
+
+  --danger: #a4402a;
 
   --radius: 2px;
   --radius-pill: 999px;
-
-  /* Spacing scale, density 4/10 — standard marketing rhythm. */
-  --space-1: 0.5rem;
-  --space-2: 1rem;
-  --space-3: 1.5rem;
-  --space-4: 2rem;
-  --space-5: 3rem;
-  --space-6: 4rem;
-  --space-7: 6rem;
-  --space-8: 8rem;
 }
 
 @theme inline {
-  --color-night: var(--night);
+  --color-paper: var(--paper);
   --color-raised: var(--raised);
   --color-raised-2: var(--raised-2);
   --color-line: var(--line);
@@ -54,6 +55,7 @@
   --color-muted: var(--muted);
   --color-muted-dim: var(--muted-dim);
   --color-glow: var(--glow);
+  --color-glow-bright: var(--glow-bright);
   --color-glow-dim: var(--glow-dim);
   --color-danger: var(--danger);
 
@@ -64,7 +66,6 @@
 
 html {
   scroll-behavior: smooth;
-  /* Keep anchored sections clear of the floating nav. */
   scroll-padding-top: 6rem;
 }
 
@@ -75,7 +76,7 @@ html {
 }
 
 body {
-  background: var(--night);
+  background: var(--paper);
   color: var(--clear);
   font-family: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -101,7 +102,7 @@ body {
   color: var(--muted);
 }
 
-/* Section index, e.g. "02". Structural, and the number means something: reading order. */
+/* Section index. The number is structural: it encodes reading order. */
 .section-index {
   font-family: var(--font-plex-mono), ui-monospace, monospace;
   font-size: 0.6875rem;
@@ -137,20 +138,19 @@ body {
     border-color 200ms ease,
     color 200ms ease,
     transform 200ms ease;
-  /* Meets the 44px minimum touch target with the padding above. */
-  min-height: 44px;
+  min-height: 44px; /* touch target */
 }
 
 .btn-primary {
-  background: var(--glow);
-  color: var(--night);
-  border: 1px solid var(--glow);
+  background: var(--glow-bright);
+  color: var(--clear);
+  border: 1px solid var(--glow-bright);
   font-weight: 500;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #f2b558;
-  border-color: #f2b558;
+  background: #b8841f;
+  border-color: #b8841f;
 }
 
 .btn-ghost {
@@ -160,12 +160,12 @@ body {
 }
 
 .btn-ghost:hover:not(:disabled) {
-  border-color: var(--muted);
-  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--clear);
+  background: rgba(16, 14, 11, 0.03);
 }
 
 .btn:disabled {
-  opacity: 0.4;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
@@ -173,9 +173,9 @@ body {
   transform: scale(0.98);
 }
 
-/* Focus is never removed. The amber ring doubles as the accent. */
+/* Focus is never removed. Black rings hold contrast against cream and gold alike. */
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 2px solid var(--glow);
+  outline: 2px solid var(--clear);
   outline-offset: 2px;
   border-radius: var(--radius);
 }
@@ -183,11 +183,11 @@ body {
 /* ------------------------------------------------------------- motion --- */
 
 /*
- * Entrance animations run through GSAP with gsap.from(), so the DOM renders in its final,
- * readable state and stays correct without JavaScript. Nothing below hides content by default.
+ * Entrance animation runs through GSAP with immediateRender: false, so a tween that never plays
+ * leaves content in its final, readable state. Nothing here hides content by default.
  */
 
-/* The long-exposure trail: light that accumulated, smeared along the axis. */
+/* Gold leaf catching the light along the axis. */
 @keyframes trail-drift {
   from {
     background-position: 0% 50%;
@@ -201,11 +201,11 @@ body {
   background-image: linear-gradient(
     100deg,
     transparent 0%,
-    rgba(233, 166, 63, 0.05) 18%,
-    rgba(233, 166, 63, 0.16) 32%,
-    rgba(233, 166, 63, 0.05) 48%,
+    rgba(201, 150, 47, 0.08) 18%,
+    rgba(201, 150, 47, 0.2) 32%,
+    rgba(201, 150, 47, 0.08) 48%,
     transparent 62%,
-    rgba(233, 166, 63, 0.1) 78%,
+    rgba(201, 150, 47, 0.14) 78%,
     transparent 100%
   );
   background-size: 200% 100%;
@@ -221,24 +221,22 @@ body {
 /* Tenure made literal: low tiers are diffuse, high tiers resolve. */
 .resolve-0 {
   filter: blur(2.5px);
-  opacity: 0.55;
+  opacity: 0.5;
 }
 .resolve-1 {
   filter: blur(1.4px);
-  opacity: 0.7;
+  opacity: 0.68;
 }
 .resolve-2 {
   filter: blur(0.6px);
-  opacity: 0.85;
+  opacity: 0.84;
 }
 .resolve-3 {
   filter: none;
   opacity: 1;
 }
 
-/* --------------------------------------------------------- scrollbars --- */
-
 ::selection {
-  background: var(--glow);
-  color: var(--night);
+  background: var(--glow-bright);
+  color: var(--clear);
 }

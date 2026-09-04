@@ -1,13 +1,13 @@
 /**
- * The ticket ladder, drawn as a long exposure.
+ * The ticket ladder, set like a printed record.
  *
  * The axis is public: it runs from zero to the published weighted total, and the winning number
  * sits at a precise, checkable position on it. Everything inside the band is not. Each
- * participant's ticket range lives there as ciphertext, rendered as accumulated light with no
+ * participant's ticket range lives there as ciphertext, rendered as gold leaf on cream with no
  * divisions drawn, because no division is knowable.
  *
- * The palette carries the argument. The trail is amber, which in this interface always means
- * encrypted and yours. The marker is bone, which always means published and checkable by anyone.
+ * The palette carries the argument. The band is gold, which in this interface always means
+ * encrypted and yours. The marker is black, which always means published and checkable by anyone.
  * You can see exactly where the draw landed and still have no idea whose range it landed in.
  */
 
@@ -77,7 +77,7 @@ export function Ladder({ total, winningNumber, drawn, epoch, compact = false }: 
 
         <p
           aria-hidden
-          className="relative h-16 select-none break-all px-2 py-2.5 font-mono text-[0.7rem] leading-[1.2] tracking-[0.1em] text-glow/25 blur-[1.1px] sm:h-20 sm:text-[0.78rem]"
+          className="relative h-16 select-none break-all px-2 py-2.5 font-mono text-[0.7rem] leading-[1.2] tracking-[0.1em] text-glow/45 blur-[1.05px] sm:h-20 sm:text-[0.78rem]"
         >
           {glyphs}
         </p>
@@ -86,7 +86,7 @@ export function Ladder({ total, winningNumber, drawn, epoch, compact = false }: 
         {drawn && hasAxis && (
           <span
             aria-hidden
-            className="absolute inset-y-0 w-px bg-clear shadow-[0_0_12px_rgba(242,239,232,0.55)]"
+            className="absolute inset-y-0 w-px bg-clear shadow-[0_0_10px_rgba(16,14,11,0.28)]"
             style={{ left: `${clamped}%` }}
           />
         )}
