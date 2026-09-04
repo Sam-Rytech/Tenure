@@ -110,46 +110,66 @@ float dust(vec2 uv, float scale, float speed, float t){
   return acc;
 }
 
+/** Position along a streak's path at normalized time u. Two harmonics keep the weave organic. */
+vec2 streakPath(float u, float s1, float s2, float freq){
+  float x = mix(-1.55, 1.55, u);
+  float a = u * 6.2831 * freq + s1 * 6.2831;
+  float y = mix(-0.46, 0.46, s2)
+          + 0.24 * sin(a)
+          + 0.085 * sin(a * 2.3 + s2 * 6.2831);
+  return vec2(x, y);
+}
+
 /*
  * Shooting streaks crossing right.
  *
- * Each is a short segment with a bright head and a tail trailing behind it. Their vertical paths
- * are sine waves of different frequency and phase, so the trajectories weave through one another
- * instead of running parallel.
+ * The trail follows the trajectory rather than approximating it. An earlier version drew one
+ * straight segment from head to tail, so as the path curved the whole segment simply rotated and
+ * the streak read as a rigid line pivoting rather than a comet flowing along its own arc. Here
+ * the path is sampled at six points behind the head and drawn as a polyline, so the tail bends
+ * through the same curve the head just travelled.
+ *
+ * Each streak weaves on two harmonics of differing frequency and phase, so trajectories cross
+ * rather than run parallel.
  */
 float streaks(vec2 uv, float t){
   float acc = 0.0;
 
-  for (int i = 0; i < 4; i++){
+  for (int i = 0; i < 3; i++){
     float fi = float(i);
     float s1 = hash(vec2(fi, 1.7));
     float s2 = hash(vec2(fi, 9.3));
     float s3 = hash(vec2(fi, 4.1));
 
-    float speed = 0.055 + 0.045 * s1;
-    float lt = fract(t * speed + s2);          // 0..1 across the field
-    float freq = 1.4 + 2.2 * s3;               // differing weave rates make paths cross
+    float speed = 0.050 + 0.040 * s1;
+    float lt = fract(t * speed + s2);
+    float fade = smoothstep(0.0, 0.10, lt) * smoothstep(1.0, 0.86, lt);
+    if (fade <= 0.002) continue;
 
-    float x = mix(-1.5, 1.5, lt);
-    float y = mix(-0.48, 0.48, s2) + 0.26 * sin(lt * 6.2831 * freq + s1 * 6.2831);
+    float freq = 0.9 + 1.6 * s3;
+    float span = 0.15 + 0.09 * s1;   // how far back the trail reaches, in path time
 
-    // Tangent of the path, so the tail lies along the direction of travel.
-    float dy = 0.26 * 6.2831 * freq * cos(lt * 6.2831 * freq + s1 * 6.2831) / 3.0;
-    vec2 dir = normalize(vec2(1.0, dy));
+    // Sample once, reuse for every segment: six path evaluations rather than ten.
+    vec2 pts[6];
+    for (int k = 0; k < 6; k++){
+      pts[k] = streakPath(lt - float(k) / 5.0 * span, s1, s2, freq);
+    }
 
-    float len = 0.30 + 0.20 * s1;
-    vec2 head = vec2(x, y);
-    vec2 tail = head - dir * len;
+    for (int k = 0; k < 5; k++){
+      vec2 a = pts[k], b = pts[k + 1];
+      vec2 pa = uv - a, ba = b - a;
+      float h = clamp(dot(pa, ba) / max(dot(ba, ba), 1e-6), 0.0, 1.0);
+      float d = length(pa - ba * h);
 
-    vec2 pa = uv - tail, ba = head - tail;
-    float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
-    float d = length(pa - ba * h);
+      float along = (float(k) + h) / 5.0;   // 0 at the head, 1 at the tip of the tail
+      float taper = 1.0 - along;
 
-    float core = smoothstep(0.0055, 0.0, d) * pow(h, 3.0);
-    float glow = smoothstep(0.032, 0.0, d) * pow(h, 4.0) * 0.55;
-    float fade = smoothstep(0.0, 0.10, lt) * smoothstep(1.0, 0.88, lt);
+      // A comet: a tight bright head that widens and dims as it trails.
+      float core = smoothstep(0.0045 * taper + 0.0009, 0.0, d) * taper * taper;
+      float glow = smoothstep(0.011 + 0.030 * along, 0.0, d) * taper * 0.45;
 
-    acc += (core + glow) * fade;
+      acc += (core + glow) * fade;
+    }
   }
   return acc;
 }

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
+
 /**
  * Floating navigation.
  *
@@ -26,9 +28,7 @@ export function Nav({ cta = { href: "/app", label: "Enter the pool" } }: { cta?:
         className={[
           "mx-auto flex max-w-5xl items-center justify-between gap-4 rounded-[999px] border px-4 py-2.5 sm:px-5",
           "transition-[background-color,border-color,backdrop-filter] duration-300",
-          condensed
-            ? "border-line bg-[rgba(252,251,248,0.78)] backdrop-blur-xl"
-            : "border-transparent bg-transparent",
+          condensed ? "border-line bg-[rgba(252,251,248,0.78)] backdrop-blur-xl" : "border-transparent bg-transparent",
         ].join(" ")}
       >
         <Link href="/" className="flex items-center gap-2.5 rounded-[2px]">
@@ -49,9 +49,7 @@ export function Nav({ cta = { href: "/app", label: "Enter the pool" } }: { cta?:
           >
             What stays private
           </Link>
-          <Link href={cta.href} className="btn btn-primary text-sm">
-            {cta.label}
-          </Link>
+          <InteractiveHoverButton href={cta.href} text={cta.label} className="px-5 text-sm" />
         </div>
       </nav>
     </header>

@@ -4,6 +4,7 @@ import { Nav } from "@/components/Nav";
 import { Ladder } from "@/components/Ladder";
 import { Reveal, HeroChoreography } from "@/components/Reveal";
 import { ShaderBackground } from "@/components/ui/shader-background";
+import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
 import { readDrawState, type DrawState } from "@/lib/chain";
 import { ADDRESSES, PHASE_LABELS, addressUrl, formatUnits6, shorten } from "@/lib/config";
 
@@ -121,14 +122,8 @@ export default async function Home() {
               </p>
 
               <div data-hero-actions className="mt-9 flex flex-wrap items-center gap-3">
-                <Link href="/app" className="btn btn-primary">
-                  Enter the pool
-                  <span aria-hidden>→</span>
-                </Link>
-                <Link href="#how" className="btn btn-ghost">
-                  How a draw works
-                  <span aria-hidden>↓</span>
-                </Link>
+                <InteractiveHoverButton href="/app" text="Enter the pool" />
+                <InteractiveHoverButton href="#how" text="How a draw works" variant="ghost" />
               </div>
 
               <div
@@ -388,10 +383,7 @@ export default async function Home() {
               balance with a single signature. Everything above this line needed no wallet at all.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/app" className="btn btn-primary">
-                Enter the pool
-                <span aria-hidden>→</span>
-              </Link>
+              <InteractiveHoverButton href="/app" text="Enter the pool" />
               <a
                 href="https://github.com/Sam-Rytech/Tenure"
                 className="btn btn-ghost"
