@@ -194,4 +194,20 @@ listed it as the first cut; that was backwards.
   tokens were left where they were, since that is the size their contrast was measured at.
 - **Found while doing it:** the deposit amount input was 14px, and iOS Safari zooms the whole page when a field under
   16px takes focus. It holds 16px on phones now and only shrinks where there is a pointer.
-- **Blockers:** none on my side. Remaining work is the video and publishing the thread.
+- **The phone now renders the same scene as the desktop**, at lower resolution, instead of a reduced version of it.
+  Three separate causes, none of which was the one it looked like: the dust grid was fixed in uv units, which are
+  normalised to the _shorter_ edge — on a tall phone that is the width, so a phone drew the same motes at a third of the
+  size and three times the count, and the field read as grain; the streak core is 0.0015 uv wide, which on a phone is
+  under half a pixel, so the stars fell between sample points and crawled rather than moved; and the second dust layer
+  and a third of the stars were simply switched off below 640px.
+- **Fourteen stars everywhere, spread properly.** Their heights were being drawn from a hash, and fourteen samples of a
+  hash do not have a distribution — they clump. Heights are stratified now: star `i` owns a band of the visible height
+  and is jittered inside it. The spawn area is derived from the canvas rather than being a constant, which is what
+  "concentrated in the centre" really was — a fixed band of half a unit covers a whole desktop hero but only the middle
+  half of a phone's.
+- **Faster than before despite all of it.** Every term that is identical for all fragments — the seeds, headings, phases
+  and positions of all fourteen stars — was being recomputed for every pixel, roughly a hundred thousand times a frame.
+  It moved to the CPU. Measured on this machine: 2.25ms a frame at the phone's configuration, against 2.68ms for the old
+  one that had six stars and one dust layer.
+- **Blockers:** none on my side. Remaining work is the video and publishing the thread. The phone rendering still needs
+  checking on a real device; I can only measure it here.
