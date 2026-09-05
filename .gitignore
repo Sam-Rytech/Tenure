@@ -11,8 +11,14 @@ cache
 coverage
 dist
 node_modules
-types
-deployments
+# Typechain output, at the root only. Same reason as /deployments/: a source directory named
+# types anywhere under frontend or lib is entirely plausible, and would vanish silently.
+/types/
+# Hardhat's deployment artefacts, at the repository root only. Unanchored, this pattern
+# matches any directory of that name at any depth — it silently swallowed the
+# frontend/app/docs/deployments route, which then 404'd in production while building fine
+# locally, because the file was on disk and simply never committed.
+/deployments/
 tmp
 
 # files
