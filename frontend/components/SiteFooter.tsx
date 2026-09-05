@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 import { ADDRESSES, addressUrl } from "@/lib/config";
 
@@ -45,7 +46,7 @@ export function SiteFooter() {
       <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
         <div>
           <div className="flex items-center gap-2.5">
-            <span aria-hidden className="block h-2 w-2 rounded-full bg-glow" />
+            <Image src="/logo.png" alt="" aria-hidden width={24} height={24} className="rounded-full" />
             <span className="display text-[1rem] tracking-tight text-clear">Tenure</span>
           </div>
           <p className="mt-4 max-w-[38ch] text-[0.8125rem] leading-relaxed text-muted">

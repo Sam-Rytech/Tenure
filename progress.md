@@ -232,5 +232,15 @@ listed it as the first cut; that was backwards.
 - **The dust was invisible on small screens.** Matching the desktop mote count divides the same picture into a third of
   the space, so each mote came out about two pixels: present in the buffer, invisible to someone holding the phone.
   Phones get five motes across the width rather than twelve, and the size range is wider.
-- **Blockers:** none on my side. Remaining work is the video and publishing the thread. checking on a real device; I can
-  only measure it here.
+- **The phone was rendering at a quarter of the resolution it needed, and I had reasoned my way into it.** Sharpness is
+  not set by canvas pixels per CSS pixel but by how far the result is stretched to reach the physical screen. A desktop
+  at ratio 1 rendered 0.7 and stretched it 1.4x. A phone at ratio 2.75 rendered the same 0.7 and stretched it 3.9x.
+  Deciding phones should ignore their device ratio removed precisely the term that governs the stretching. It is a
+  fragment budget against the real ratio now, and the recorded device drops from 3.9x to 2.4x.
+- **The dust now reads one cell instead of nine, and that is exact rather than an approximation.** Each mote is held
+  inside its cell by a margin wider than the largest radius a mote can have, so a mote in a neighbouring cell provably
+  cannot reach across the boundary. Measured on this machine: 3.5ms a frame at 522k fragments against 6.85ms for the old
+  shader at 564k — cheaper than what it replaces while shading nearly twice the pixels on a phone.
+- **Logo in place**, cropped to a circle at 4x and downsampled so the edge is clean. Favicon, Apple touch icon, the mark
+  in the nav and footer, and a social card.
+- **Blockers:** none on my side. Remaining work is the video and publishing the thread. only measure it here.

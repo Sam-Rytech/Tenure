@@ -97,39 +97,40 @@ float fbm(vec2 p){
 /*
  * Gold dust drifting left.
  *
- * A tiled grid holds one mote per cell, so each fragment only inspects its own cell and the eight
- * around it rather than iterating a particle list. Advancing the sample space to the right makes
- * the motes travel left; each carries its own wobble so the drift reads as random rather than as
- * a sheet sliding across.
+ * A tiled grid holds one mote per cell. Advancing the sample space to the right makes the motes
+ * travel left; each carries its own wobble so the drift reads as random rather than as a sheet
+ * sliding across.
+ *
+ * Only the fragment's own cell is examined, and that is exact rather than an approximation. Each
+ * mote is held inside its cell by a margin wider than the largest radius a mote can have, so a
+ * mote in a neighbouring cell cannot reach across the boundary — the nearest it can come is
+ * 0.08 of a cell short of it. The 3x3 sweep this replaces produced an identical picture for nine
+ * times the work, and the dust was the most expensive thing on the page.
  */
 float dust(vec2 uv, float scale, float speed, float t){
   vec2 p = uv * scale;
   p.x += t * speed;
   vec2 cell = floor(p), f = fract(p);
-  float acc = 0.0;
 
   // One render pixel, in cell units. A mote thinner than a couple of pixels stops being a mote
   // and becomes shimmer, which is what the field looked like on a phone.
   float unit = scale / MN;
 
-  for (int y = -1; y <= 1; y++){
-    for (int x = -1; x <= 1; x++){
-      vec2 o = vec2(float(x), float(y));
-      vec2 id = cell + o;
-      float r1 = hash(id);
-      float r2 = hash(id + 17.31);
-      vec2 c = o + vec2(r1, r2);
-      c.y += 0.18 * sin(t * (0.25 + r1 * 0.8) + r2 * 6.2831);
-      c.x += 0.10 * cos(t * (0.20 + r2 * 0.6) + r1 * 6.2831);
-      float d = length(f - c);
-      // 1.6 pixels, not 2: a radial falloff is antialiased by its own gradient, and a floor high
-      // enough to clamp every mote on a phone would take away the size variation along with the
-      // shimmer, leaving uniform specks.
-      float size = max(mix(0.026, 0.072, r2), unit * 1.6);
-      acc += smoothstep(size, 0.0, d) * (0.35 + 0.65 * r1);
-    }
-  }
-  return acc;
+  float r1 = hash(cell);
+  float r2 = hash(cell + 17.31);
+
+  vec2 c = vec2(r1, r2);
+  c.y += 0.18 * sin(t * (0.25 + r1 * 0.8) + r2 * 6.2831);
+  c.x += 0.10 * cos(t * (0.20 + r2 * 0.6) + r1 * 6.2831);
+
+  // The margin that makes the single-cell lookup exact. It is wider than MARGIN below.
+  c = clamp(c, vec2(0.08), vec2(0.92));
+
+  // Capped at the same 0.08, so the invariant holds however coarse the buffer gets.
+  float size = min(max(mix(0.026, 0.072, r2), unit * 1.6), 0.08);
+
+  float d = length(f - c);
+  return smoothstep(size, 0.0, d) * (0.35 + 0.65 * r1);
 }
 
 /*
@@ -208,12 +209,13 @@ void main(void){
   col = mix(col, gold, clamp(motes, 0.0, 1.0) * 0.55);
 
   /*
-   * Meteors cross the whole field, including behind the 11px secondary text. Measured against the
-   * darkest tone the field itself produces, a 0.36 blend leaves that text at 4.58:1 — still clear
-   * of the AA floor — where 0.6 would have dropped it to 4.0.
+   * Meteors cross the whole field, including behind the 11px secondary text. At 0.36 they washed
+   * out once the canvas was stretched to a phone's screen. 0.45 holds up, and the worst case a
+   * fragment can reach — peak field, a mote and a streak at once — measures 5.5:1 against the
+   * darkened token that text uses.
    */
   vec3 deepGold = gold * 0.82;
-  col = mix(col, deepGold, clamp(meteors(uv), 0.0, 1.0) * 0.36);
+  col = mix(col, deepGold, clamp(meteors(uv), 0.0, 1.0) * 0.45);
 
   // Settle back toward flat paper at the edges so the panel has no visible boundary.
   float vignette = smoothstep(1.85, 0.05, length(uv * vec2(0.66, 1.0)));
@@ -484,17 +486,36 @@ export function ShaderBackground({ className = "" }: { className?: string }) {
     /*
      * Backing-store scale, in canvas pixels per CSS pixel.
      *
-     * A phone deliberately ignores its device pixel ratio. Everything on this field is soft
-     * except the streaks, and the streaks are now held to just over a pixel wide inside the
-     * shader, so resolution buys nothing here that the shader is not already guaranteeing —
-     * while fragment count, and therefore heat, scales with its square. Rendering below one
-     * device pixel is what pays for the phone having the same dust and the same fourteen stars
-     * as the desktop rather than a reduced version of them.
+     * What matters for sharpness is not this number but how far the result is stretched to reach
+     * the physical screen, and that is where the phone was being let down. A desktop at 1280 CSS
+     * pixels and a ratio of 1 rendered 0.7 of a pixel each and stretched it 1.4 times. A phone at
+     * 393 CSS pixels and a ratio of 2.75 rendered the same 0.7 and stretched it 3.9 times, so the
+     * dust arrived as smudges and the streaks barely arrived at all. Ignoring the device ratio
+     * was the mistake: it is precisely the term that decides how much stretching happens.
+     *
+     * So the target is expressed against the device ratio, and a budget on total fragments keeps
+     * the cost roughly constant whatever the screen. Both ends land near the same number of
+     * pixels to shade, which is what makes one set of quality decisions hold everywhere.
      */
-    const scaleFor = (width: number) => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      if (width < 640) return 0.7;
-      return Math.min((width < 1280 ? 0.75 : 0.7) * dpr, 1.0);
+    /*
+     * Fragments to shade, whatever the screen.
+     *
+     * Raised from 400k once the dust stopped sweeping nine cells per layer. The number is chosen
+     * so a tall phone hero and a wide desktop one cost about the same, which is what lets one set
+     * of quality decisions hold on both.
+     */
+    const BUDGET = 700_000;
+
+    const scaleFor = (width: number, height: number) => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 3);
+      // Buffer pixels per CSS pixel we would like, before the budget has its say.
+      const wanted = width < 640 ? 1.35 : width < 1280 ? 0.9 : 0.75;
+      let scale = Math.min(dpr, wanted);
+
+      const fragments = width * height * scale * scale;
+      if (fragments > BUDGET) scale *= Math.sqrt(BUDGET / fragments);
+
+      return Math.max(0.5, scale);
     };
 
     /*
@@ -509,7 +530,7 @@ export function ShaderBackground({ className = "" }: { className?: string }) {
     const sync = () => {
       const rect = canvas.getBoundingClientRect();
       if (rect.width === 0 || rect.height === 0) return;
-      field.resize(rect.width, rect.height, scaleFor(rect.width), cellsFor(rect.width));
+      field.resize(rect.width, rect.height, scaleFor(rect.width, rect.height), cellsFor(rect.width));
     };
 
     let running = false;

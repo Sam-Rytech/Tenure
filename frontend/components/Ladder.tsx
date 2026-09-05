@@ -49,16 +49,31 @@ export function Ladder({ total, winningNumber, drawn, epoch, compact = false }: 
       {/* The marker rail sits above the band so the published value never overlaps the private one. */}
       <div className="relative h-20 sm:h-[5.5rem]">
         {drawn && hasAxis && (
-          <div
-            data-reveal-marker
-            className="absolute bottom-0 flex -translate-x-1/2 flex-col items-center"
-            style={{ left: `${clamped}%` }}
-          >
-            <span className="eyebrow whitespace-nowrap !text-[0.625rem]">winning number</span>
-            <span className="mt-1 font-mono text-xl leading-none tabular-nums text-clear sm:text-[1.375rem]">
-              {winningNumber.toLocaleString("en-US")}
-            </span>
-            <span aria-hidden className="mt-2 block h-6 w-px bg-clear" />
+          /*
+           * The label is centred on the tick, and a tick near either end pushed it off the side —
+           * on a phone a winning number in the first few percent had its own caption clipped. The
+           * tick stays exactly where the number falls; only the label slides back inside, and the
+           * two are separate elements so accuracy is never traded for legibility.
+           */
+          <div data-reveal-marker className="absolute bottom-0 left-0 right-0 h-full">
+            <div
+              className="absolute bottom-8 flex flex-col items-center"
+              style={{
+                left: `${clamped}%`,
+                // Nudged inward only as far as it needs to be to stay on screen.
+                transform: `translateX(${clamped < 18 ? -clamped : clamped > 82 ? -100 + (100 - clamped) : -50}%)`,
+              }}
+            >
+              <span className="eyebrow whitespace-nowrap !text-[0.625rem]">winning number</span>
+              <span className="mt-1 font-mono text-xl leading-none tabular-nums text-clear sm:text-[1.375rem]">
+                {winningNumber.toLocaleString("en-US")}
+              </span>
+            </div>
+            <span
+              aria-hidden
+              className="absolute bottom-0 block h-6 w-px -translate-x-1/2 bg-clear"
+              style={{ left: `${clamped}%` }}
+            />
           </div>
         )}
       </div>

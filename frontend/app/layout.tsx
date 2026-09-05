@@ -35,15 +35,19 @@ export const metadata: Metadata = {
     description:
       "Confidential prize savings. Encrypted balances, tenure-weighted odds, a publicly verifiable draw and an unidentifiable winner.",
     type: "website",
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Tenure" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Tenure — hold longer, win quieter",
+    description: "Confidential prize savings on the Zama Protocol. Anyone can check the draw. Nobody can tell who won.",
+    images: ["/og.png"],
   },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={`${bricolage.variable} ${plexSans.variable} ${plexMono.variable} h-full antialiased`}
-    >
+    <html lang="en" className={`${bricolage.variable} ${plexSans.variable} ${plexMono.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <Providers>{children}</Providers>
       </body>

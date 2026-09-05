@@ -32,7 +32,7 @@
   --clear: #100e0b; /* near-black. published, verifiable. 18:1 on paper */
   --muted: #5f594f; /* secondary. 6.8:1 */
   --muted-dim: #6f675b; /* tertiary. 5.5:1 — still passes for small text */
-  --muted-strong: #3a342c; /* for small text sitting over the shader field */
+  --muted-strong: #241f19; /* small text over the shader field; dark enough for a streak to cross it */
 
   /* accent */
   --glow: #8a6318; /* gold for TYPE. 5.3:1 on paper */

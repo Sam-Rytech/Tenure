@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
@@ -11,7 +12,11 @@ import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button
  * It condenses once the hero is behind you, which is the one piece of state the nav needs to
  * carry: whether you are still being pitched to, or already reading.
  */
-export function Nav({ cta = { href: "/dashboard", label: "Enter the pool" } }: { cta?: { href: string; label: string } }) {
+export function Nav({
+  cta = { href: "/dashboard", label: "Enter the pool" },
+}: {
+  cta?: { href: string; label: string };
+}) {
   const [condensed, setCondensed] = useState(false);
 
   useEffect(() => {
@@ -32,7 +37,12 @@ export function Nav({ cta = { href: "/dashboard", label: "Enter the pool" } }: {
         ].join(" ")}
       >
         <Link href="/" className="flex items-center gap-2.5 rounded-[2px]">
-          <span aria-hidden className="block h-2 w-2 rounded-full bg-glow" />
+          {/*
+            The mark is already a circle with its own black ground, so it needs no ring and no
+            background of ours. Fixed dimensions and a matching `sizes` keep it off the layout's
+            critical path — a logo that resizes after load shifts the whole bar.
+          */}
+          <Image src="/logo.png" alt="" aria-hidden width={22} height={22} priority className="rounded-full" />
           <span className="display text-[1rem] tracking-tight text-clear">Tenure</span>
         </Link>
 
