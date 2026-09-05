@@ -8,9 +8,9 @@ export const SEPOLIA_CHAIN_ID = 11155111;
  * current public deployment.
  */
 export const ADDRESSES = {
-  pool: (process.env.NEXT_PUBLIC_POOL_ADDRESS ?? "0x6c36d9b70954029D66032FEF2A4880b22a53AF9e") as `0x${string}`,
+  pool: (process.env.NEXT_PUBLIC_POOL_ADDRESS ?? "0x76012034adbcF3786798bf2b9C7972FA975bb339") as `0x${string}`,
   reserve: (process.env.NEXT_PUBLIC_RESERVE_ADDRESS ??
-    "0xd8701a0040032f3633E740Ce111dc50C3f84Bc79") as `0x${string}`,
+    "0x03cf9Dae9A39A34d9388de1EF16eE136F1507F2a") as `0x${string}`,
   /** Zama's published cUSDC wrapper. */
   cusdc: "0x7c5BF43B851c1dff1a4feE8dB225b87f2C223639" as `0x${string}`,
   /** Zama's published Mock USDC, which anyone may mint. This is the faucet. */

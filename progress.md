@@ -167,4 +167,15 @@ listed it as the first cut; that was backwards.
 
 ### 5 Sep
 
-- **Blockers:**
+- **Final deployment.** TenurePool `0x76012034adbcF3786798bf2b9C7972FA975bb339`, PrizeReserve
+  `0x03cf9Dae9A39A34d9388de1EF16eE136F1507F2a`. Both Etherscan-verified. Frontend and README point at them; the repo and
+  the deployed bytecode are back in sync.
+- **Clean cycle recorded, and it now shows the differentiator.** All three savers had held an epoch, so the published
+  total is 2,000,000 against 1,000,000 of stakes — the 2x tenure tier, visible on-chain. W 420,467 landed in the first
+  range; claims decrypted to 1,000,000 / 0 / 0.
+- **Two real bugs fixed getting there.** Decryption permits were anchored to the local clock, and a few seconds of skew
+  made the relayer reject every user decryption with `validation_failed: requestValidity`; they are anchored to chain
+  time now. And the keeper funded the prize once at startup, but finalizing an epoch advances the counter, so the next
+  `closeEpoch` reverted with `PrizeNotFunded` — funding now happens immediately before each close.
+- **Disk was full** (0 bytes of 238G). Cleared `frontend/.next` at 1.1GB and the npm cache at 2.2GB.
+- **Blockers:** none on my side. Remaining work is the video and publishing the thread.

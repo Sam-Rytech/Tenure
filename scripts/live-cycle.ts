@@ -36,8 +36,11 @@ function relaxHttpTimeouts(): void {
         bodyTimeout: 120_000,
       }),
     );
-  } catch {
-    // undici unavailable; fall back to the platform defaults.
+    console.log("  [http] relayer timeouts raised to 120s");
+  } catch (e) {
+    // Without this the default 10s connect timeout throws from a timer callback, which escapes
+    // any surrounding try/catch and kills the run mid-cycle.
+    console.warn(`  [http] WARNING: could not raise timeouts: ${(e as Error).message}`);
   }
 }
 
@@ -182,6 +185,19 @@ async function main(): Promise<void> {
   outFile = path.join(recordDir, `cycle-${networkDir}.json`);
   loadPrevious(outFile);
 
+  /*
+   * Decryption permits carry a validity window, and the relayer rejects one whose start is in
+   * its own future with `validation_failed: requestValidity`. Left to default, the window is
+   * anchored to this machine's clock, so even a few seconds of skew makes every user decryption
+   * fail. Anchoring to chain time with a margin behind it removes the dependency on local time.
+   */
+  const latestBlock = await ethers.provider.getBlock("latest");
+  const validity = {
+    startTimestamp: (latestBlock?.timestamp ?? Math.floor(Date.now() / 1000)) - 300,
+    durationDays: 1,
+  };
+  record("decrypt permit window", undefined, `starts ${validity.startTimestamp}, 1 day`);
+
   const poolDeployment = await deployments.get("TenurePool");
   const reserveDeployment = await deployments.get("PrizeReserve");
 
@@ -226,15 +242,21 @@ async function main(): Promise<void> {
   console.log(`PrizeReserve ${reserveDeployment.address}`);
   console.log(`cUSDC        ${cusdcAddress}\n`);
 
-  // --- 1. fund the prize -------------------------------------------------
-  const fundingEpoch = Number(await pool.currentEpoch());
-  console.log("Prize funding:");
-  if (await pool.prizeFunded(fundingEpoch)) {
-    record("prize already funded", undefined, `epoch ${fundingEpoch}`);
-  } else {
-    await send("mint underlying (prize)", underlying.connect(deployer).mint(deployer.address, PRIZE));
+  /*
+   * Fund an epoch immediately before closing it, never once at startup.
+   *
+   * Finalizing an epoch advances the counter, so a prize funded for whichever epoch was current
+   * when the script began belongs to an epoch that has already closed by the time the next one
+   * needs it, and closeEpoch reverts with PrizeNotFunded.
+   */
+  async function ensureFunded(epoch: number): Promise<void> {
+    if (await pool.prizeFunded(epoch)) {
+      record("prize already funded", undefined, `epoch ${epoch}`);
+      return;
+    }
+    await send(`mint underlying (epoch ${epoch})`, underlying.connect(deployer).mint(deployer.address, PRIZE));
     await send("approve reserve", underlying.connect(deployer).approve(reserveDeployment.address, PRIZE));
-    await send("fundEpoch", reserve.connect(deployer).fundEpoch(fundingEpoch, PRIZE) as Tx);
+    await send(`fundEpoch(${epoch})`, reserve.connect(deployer).fundEpoch(epoch, PRIZE) as Tx);
   }
 
   // --- 2. participants deposit -------------------------------------------
@@ -266,7 +288,7 @@ async function main(): Promise<void> {
   // --- 3. drive the draw machine -----------------------------------------
   // Deposits are deferred by one epoch, so the first close draws nobody and rolls forward.
   for (let round = 0; round < 3; round++) {
-    const epoch = Number(await pool.currentEpoch());
+    let epoch = Number(await pool.currentEpoch());
     console.log(`\nEpoch ${epoch} (phase ${PHASE_NAMES[Number(await pool.phase())]}):`);
 
     // A finished epoch sits in CLAIMABLE until its claim window expires; finalize to reopen.
@@ -278,9 +300,11 @@ async function main(): Promise<void> {
         break;
       }
       await send(`finalizeEpoch(${epoch})`, pool.connect(deployer).finalizeEpoch() as Tx);
+      epoch = Number(await pool.currentEpoch());
     }
 
     if (Number(await pool.phase()) === 0) {
+      await ensureFunded(epoch);
       await send(`closeEpoch(${epoch})`, pool.connect(deployer).closeEpoch() as Tx);
     }
 
@@ -325,7 +349,7 @@ async function main(): Promise<void> {
     }
     const handle = await pool.confidentialPendingPrizeOf(who.address);
     const award = await withRetry(`${label} userDecrypt`, () =>
-      fhevm.userDecryptEuint(FhevmType.euint64, handle, poolDeployment.address, who),
+      fhevm.userDecryptEuint(FhevmType.euint64, handle, poolDeployment.address, who, { validity }),
     );
     awards.push(award);
     record(`${label} pendingPrize`, undefined, award.toString());
@@ -345,7 +369,7 @@ async function main(): Promise<void> {
 
   const winnerBalanceHandle = await pool.confidentialBalanceOf(winner.address);
   const balance = await withRetry("winner balance", () =>
-    fhevm.userDecryptEuint(FhevmType.euint64, winnerBalanceHandle, poolDeployment.address, winner),
+    fhevm.userDecryptEuint(FhevmType.euint64, winnerBalanceHandle, poolDeployment.address, winner, { validity }),
   );
   record("winner balance", undefined, `${balance} (stake ${STAKES[winnerIdx]} + prize ${PRIZE})`);
 

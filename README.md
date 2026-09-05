@@ -204,8 +204,8 @@ judges mint the underlying directly, then wrap it.
 
 | Contract                 | Address                                                                                                                              |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `TenurePool`             | [`0x6c36d9b70954029D66032FEF2A4880b22a53AF9e`](https://sepolia.etherscan.io/address/0x6c36d9b70954029D66032FEF2A4880b22a53AF9e#code) |
-| `PrizeReserve`           | [`0xd8701a0040032f3633E740Ce111dc50C3f84Bc79`](https://sepolia.etherscan.io/address/0xd8701a0040032f3633E740Ce111dc50C3f84Bc79#code) |
+| `TenurePool`             | [`0x76012034adbcF3786798bf2b9C7972FA975bb339`](https://sepolia.etherscan.io/address/0x76012034adbcF3786798bf2b9C7972FA975bb339#code) |
+| `PrizeReserve`           | [`0x03cf9Dae9A39A34d9388de1EF16eE136F1507F2a`](https://sepolia.etherscan.io/address/0x03cf9Dae9A39A34d9388de1EF16eE136F1507F2a#code) |
 | Mock USDC (public mint)  | [`0x9b5Cd13b8eFbB58Dc25A05CF411D8056058aDFfF`](https://sepolia.etherscan.io/address/0x9b5Cd13b8eFbB58Dc25A05CF411D8056058aDFfF)      |
 | cUSDC (ERC-7984 wrapper) | [`0x7c5BF43B851c1dff1a4feE8dB225b87f2C223639`](https://sepolia.etherscan.io/address/0x7c5BF43B851c1dff1a4feE8dB225b87f2C223639)      |
 
@@ -217,24 +217,27 @@ constants; a production deployment would use hours for the stall timeout and day
 
 ### A verified draw
 
-One complete three-participant cycle, run on Sepolia. Stakes were 300,000, 200,000 and 500,000 base units, giving ticket
-ranges `[0, 300k)`, `[300k, 500k)` and `[500k, 1M)`.
+One complete three-participant cycle, run on Sepolia. Three savers deposited 300,000, 200,000 and 500,000 base units and
+had each held across an epoch boundary, so every stake counted at the 2x tenure tier: the published weighted total is
+**2,000,000** against 1,000,000 of deposits. That doubling is the tenure multiplier, visible on-chain rather than merely
+described.
 
 | Step                       | Transaction                                                                                                         |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| Fund the epoch prize       | [`0xb78941e3…`](https://sepolia.etherscan.io/tx/0xb78941e358570955f554e7e070e783cf20a4265ad1ed9ecfefdbd62c59b00be0) |
-| Close the epoch            | [`0x1ab0eed7…`](https://sepolia.etherscan.io/tx/0x1ab0eed76351b8580826c5c4600d7f2d4fa615f76c52ea55b48e0c8ef9ab6f99) |
-| Build the encrypted ladder | [`0x210f5bcf…`](https://sepolia.etherscan.io/tx/0x210f5bcf08a4e3d2a6154eb9709e3d0fb9954a4293ab6413e4a449806187923c) |
-| Publish total, draw `W`    | [`0x7773f189…`](https://sepolia.etherscan.io/tx/0x7773f1894c07966539a81f2799e05fff8fb209c58c532acd2db262bd6d79ce5b) |
-| Publish the winning number | [`0xc47488ba…`](https://sepolia.etherscan.io/tx/0xc47488ba4516f09f68736b3a8ed80c2bd40a39cbcc1cdee3daf98ad98c2df1d9) |
-| Winner claims              | [`0x14dbf9d0…`](https://sepolia.etherscan.io/tx/0x14dbf9d060944ccf696e2be44fc4b2378155b13e777c0f38faadefc56e75b2a9) |
-| Winner banks the prize     | [`0x3c53441b…`](https://sepolia.etherscan.io/tx/0x3c53441b3a226dbeb75da0433ffac678ccc7a195fbf91552dde59b398811b094) |
+| Fund the epoch prize       | [`0x26eb3a5a…`](https://sepolia.etherscan.io/tx/0x26eb3a5ab0dd1d99a9c227163f6555ed18d7ac7d8c6fe7bf75b7d6efcaf8d165) |
+| Close the epoch            | [`0x55248619…`](https://sepolia.etherscan.io/tx/0x5524861962346ca3ee21edf0bb997dd541d9c4a28c71600e4c04950f33e30e83) |
+| Build the encrypted ladder | [`0x444cff70…`](https://sepolia.etherscan.io/tx/0x444cff7012dbb3e96593e7293fe04678402a66e08fafe2a377997c4304cce563) |
+| Publish total, draw `W`    | [`0x688bca58…`](https://sepolia.etherscan.io/tx/0x688bca58cacb4936ea7b645ec3704ee73aa7f54cba59d7b363852cb222253311) |
+| Publish the winning number | [`0x14bbab61…`](https://sepolia.etherscan.io/tx/0x14bbab610b9d3261251bf4e5011605eb569ccfae249d21786060f711a462bb73) |
+| Winner claims              | [`0x1130c2d3…`](https://sepolia.etherscan.io/tx/0x1130c2d3acee4236fcc659662cf27e927ffc7a50086cdcf478f359db7bfae69c) |
+| Winner banks the prize     | [`0x70b35207…`](https://sepolia.etherscan.io/tx/0x70b35207b4461e1e92cb39c7ed8a02738177f9ff0521593b6705f6f00728d961) |
 
-Published total **1,000,000**. Published winning number **618,870**, which falls in the third range. Decrypting each
-participant's `pendingPrize` gave `0`, `0`, and `1,000,000` — exactly one winner, identifiable only by that participant
-decrypting their own handle. The winner's balance became 1,500,000: their 500,000 stake plus the 1,000,000 prize.
+Published total **2,000,000**. Published winning number **420,467**, which falls in the first range. All three
+participants claimed and decrypted their own results: `1,000,000`, `0` and `0` — exactly one winner, identifiable only
+by that participant decrypting their own handle. The winner's balance became 1,300,000: their 300,000 stake plus the
+1,000,000 prize.
 
-Every transaction from the run, 45 steps in all, is recorded in [`docs/cycle-sepolia.json`](docs/cycle-sepolia.json).
+Every transaction from the run is recorded in [`docs/cycle-sepolia.json`](docs/cycle-sepolia.json).
 
 ### Reproducing it
 
