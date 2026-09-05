@@ -221,5 +221,16 @@ listed it as the first cut; that was backwards.
 - **A second bug underneath it:** a fresh account has no ciphertext and the pool returns a zero handle, which is a
   truthy string, so it was being sent to the relayer to decrypt. Zero handles are filtered out and shown as zero. It is
   not a secret, and it should not cost a signature to learn that nothing is nothing.
-- **Blockers:** none on my side. Remaining work is the video and publishing the thread. The phone rendering still needs
-  checking on a real device; I can only measure it here.
+- **Every dashboard tab but one rendered blank once connected.** The gate was written as
+  `const gate = <ConnectGate />; if (gate) return gate;` — and a React element is truthy whether or not the component
+  renders anything, so a connected user always got the gate, which returned null. It is a predicate now. Round was
+  unaffected because it has no gate, which is what made it look like a data problem rather than a control-flow one.
+- **The streaks were stepping because they had an edge at all.** `smoothstep(w, 0, d)` draws a shape with a definite
+  radius, and that boundary has to land somewhere on the pixel grid; on a slow diagonal it lands on one row, then the
+  next. No width floor fixes it, because the edge exists at every width. They use an inverse-square falloff now — 1 at
+  the centre, half at w, and no boundary anywhere — which is the same thing the reference shader gets from its 1/d term.
+- **The dust was invisible on small screens.** Matching the desktop mote count divides the same picture into a third of
+  the space, so each mote came out about two pixels: present in the buffer, invisible to someone holding the phone.
+  Phones get five motes across the width rather than twelve, and the size range is wider.
+- **Blockers:** none on my side. Remaining work is the video and publishing the thread. checking on a real device; I can
+  only measure it here.

@@ -3,7 +3,7 @@
 import { useAccount, useDisconnect } from "wagmi";
 
 import { usePool } from "@/components/dashboard/usePool";
-import { ConnectGate } from "@/components/dashboard/ConnectGate";
+import { ConnectGate, needsWallet } from "@/components/dashboard/ConnectGate";
 import { Button, Row, PageHead, ErrorNote } from "@/components/dashboard/ui";
 import { formatUnits6, shorten, tierLabelForShift } from "@/lib/config";
 
@@ -12,8 +12,7 @@ export default function Overview() {
   const { address } = useAccount();
   const { disconnect } = useDisconnect();
 
-  const gate = <ConnectGate pool={pool} />;
-  if (gate) return gate;
+  if (needsWallet(pool)) return <ConnectGate pool={pool} />;
 
   return (
     <>

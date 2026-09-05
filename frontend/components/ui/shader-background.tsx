@@ -125,7 +125,7 @@ float dust(vec2 uv, float scale, float speed, float t){
       // 1.6 pixels, not 2: a radial falloff is antialiased by its own gradient, and a floor high
       // enough to clamp every mote on a phone would take away the size variation along with the
       // shimmer, leaving uniform specks.
-      float size = max(mix(0.020, 0.055, r2), unit * 1.6);
+      float size = max(mix(0.026, 0.072, r2), unit * 1.6);
       acc += smoothstep(size, 0.0, d) * (0.35 + 0.65 * r1);
     }
   }
@@ -163,19 +163,27 @@ float meteors(vec2 uv){
     float h2 = h * h;
 
     /*
-     * The floor is two pixels, not one.
+     * Inverse-square falloff rather than a smoothstep, and this is the whole reason the streaks
+     * used to look chiselled.
      *
-     * A streak whose whole width is a single pixel has nowhere to put its own gradient: the edge
-     * lands on one sample or the next as it moves, and a diagonal line drawn that way steps
-     * instead of sliding. Two pixels is the minimum that can carry a soft edge, and on a canvas
-     * that is upscaled to the display it is what stops the trail looking chiselled.
+     * smoothstep(w, 0, d) draws a shape with a definite radius: past w there is nothing, and
+     * that boundary is a real edge that has to land somewhere on the pixel grid. On a diagonal
+     * moving a fraction of a pixel per frame it lands on one row, then the next, and the eye
+     * reads the staircase — no width floor fixes that, because the edge exists at every width.
+     *
+     * A Lorentzian has no boundary at all. It is 1 at the centre, half at w, and thereafter it
+     * simply keeps getting smaller, so there is nothing to alias and nothing to step. It is also
+     * what the reference this was compared against is doing with its 1/d term.
      */
-    float w = max(mix(0.0018, 0.0075, h), px * 2.0);
+    float w = max(mix(0.0022, 0.0080, h), px * 1.6);
+    float w2 = w * w;
+    float d2 = d * d;
 
-    // A separate constant band at the edge, so the falloff does not get thinner as the tail does.
-    float aa = px * 0.9;
-    float core = smoothstep(w + aa, max(w - aa, 0.0), d) * h2;
-    float glow = smoothstep(w * 5.0 + max(0.0050, px * 3.5), 0.0, d) * h2 * h * 0.5;
+    float core = w2 / (d2 + w2) * h2;
+
+    // A wider, fainter halo on the same falloff, which gives the trail its air.
+    float gw = w * 4.5 + max(0.0045, px * 3.0);
+    float glow = (gw * gw) / (d2 + gw * gw) * h2 * h * 0.45;
 
     acc += (core + glow) * mFade[i];
   }
@@ -489,8 +497,14 @@ export function ShaderBackground({ className = "" }: { className?: string }) {
       return Math.min((width < 1280 ? 0.75 : 0.7) * dpr, 1.0);
     };
 
-    /** Motes across the viewport width. Fewer on a phone means each one is big enough to read. */
-    const cellsFor = (width: number) => (width < 640 ? 7 : width < 1280 ? 10 : 12);
+    /*
+     * Motes across the viewport width.
+     *
+     * Fewer on a small screen, so each one is physically bigger. Matching the desktop count on a
+     * phone divides the same picture into a third of the space, and the motes come out at about
+     * two pixels — present in the buffer, invisible to a person holding the phone.
+     */
+    const cellsFor = (width: number) => (width < 640 ? 5 : width < 1024 ? 8 : 12);
 
     const sync = () => {
       const rect = canvas.getBoundingClientRect();

@@ -3,7 +3,7 @@
 import { useAccount, useDisconnect } from "wagmi";
 
 import { usePool } from "@/components/dashboard/usePool";
-import { ConnectGate } from "@/components/dashboard/ConnectGate";
+import { ConnectGate, needsWallet } from "@/components/dashboard/ConnectGate";
 import { Button, Row, PageHead } from "@/components/dashboard/ui";
 import { ADDRESSES, RPC_URL, SEPOLIA_CHAIN_ID, addressUrl, shorten } from "@/lib/config";
 
@@ -12,8 +12,7 @@ export default function Settings() {
   const { address, connector } = useAccount();
   const { disconnect } = useDisconnect();
 
-  const gate = <ConnectGate pool={pool} />;
-  if (gate) return gate;
+  if (needsWallet(pool)) return <ConnectGate pool={pool} />;
 
   return (
     <>

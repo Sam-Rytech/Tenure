@@ -3,15 +3,14 @@
 import { useState } from "react";
 
 import { usePool } from "@/components/dashboard/usePool";
-import { ConnectGate } from "@/components/dashboard/ConnectGate";
+import { ConnectGate, needsWallet } from "@/components/dashboard/ConnectGate";
 import { Button, PageHead, ErrorNote, LastTx } from "@/components/dashboard/ui";
 
 export default function Deposit() {
   const pool = usePool();
   const [amount, setAmount] = useState("1");
 
-  const gate = <ConnectGate pool={pool} />;
-  if (gate) return gate;
+  if (needsWallet(pool)) return <ConnectGate pool={pool} />;
 
   return (
     <>
