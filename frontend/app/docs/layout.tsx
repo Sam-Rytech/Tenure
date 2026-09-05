@@ -1,8 +1,7 @@
-import Link from "next/link";
-
 import { Nav } from "@/components/Nav";
 import { DocsSidebar } from "@/components/docs/DocsSidebar";
 import { DocsPager } from "@/components/docs/DocsPager";
+import { SiteFooter } from "@/components/SiteFooter";
 
 /**
  * The documentation shell.
@@ -25,18 +24,10 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
             {children}
 
             <DocsPager />
-
-            <footer className="hairline mt-12 pt-6">
-              <p className="text-xs leading-relaxed text-muted">
-                Testnet only. Built on the Zama Protocol for the Zama Developer Program.{" "}
-                <Link href="/" className="text-clear underline-offset-4 hover:text-glow hover:underline">
-                  Back to the overview
-                </Link>
-                .
-              </p>
-            </footer>
           </article>
         </div>
+
+        <SiteFooter />
       </main>
     </>
   );

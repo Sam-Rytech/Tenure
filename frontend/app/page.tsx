@@ -1,10 +1,11 @@
 import { Nav } from "@/components/Nav";
 import { Ladder } from "@/components/Ladder";
+import { SiteFooter } from "@/components/SiteFooter";
 import { Reveal, HeroChoreography } from "@/components/Reveal";
 import { ShaderBackground } from "@/components/ui/shader-background";
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
 import { readDrawState, type DrawState } from "@/lib/chain";
-import { ADDRESSES, PHASE_LABELS, addressUrl, formatUnits6, shorten } from "@/lib/config";
+import { ADDRESSES, PHASE_LABELS, addressUrl, formatUnits6 } from "@/lib/config";
 
 export const revalidate = 15;
 
@@ -62,6 +63,24 @@ function TierRow({
   );
 }
 
+/** One question and its answer. A details element, so the answers are searchable and printable. */
+function Faq({ q, children }: { q: string; children: React.ReactNode }) {
+  return (
+    <details className="group border-t border-line py-4">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[1rem] text-clear">
+        {q}
+        <span
+          aria-hidden
+          className="shrink-0 font-mono text-[1.125rem] text-glow transition-transform group-open:rotate-45"
+        >
+          +
+        </span>
+      </summary>
+      <p className="mt-3 max-w-[64ch] text-[0.875rem] leading-relaxed text-muted">{children}</p>
+    </details>
+  );
+}
+
 export default async function Home() {
   let state: DrawState | null = null;
   let readError: string | null = null;
@@ -114,13 +133,13 @@ export default async function Home() {
               </h1>
 
               <p data-hero-copy className="mt-7 max-w-[54ch] text-[1rem] leading-relaxed text-muted">
-                Deposit into a shared pool and the yield is drawn as a prize. Your balance is stored as ciphertext, your
-                odds rise the longer you hold, and your principal is never locked. Anyone can verify the draw was fair.
-                Nobody can work out who won.
+                Put money into a shared pool. The interest it earns is given away as a prize, so nobody loses their
+                savings. Your balance is encrypted, your odds go up the longer you hold, and you can take your money out
+                whenever you like. Anyone can check the draw was fair. Nobody can tell who won.
               </p>
 
               <div data-hero-actions className="mt-9 flex flex-wrap items-center gap-3">
-                <InteractiveHoverButton href="/app" text="Enter the pool" />
+                <InteractiveHoverButton href="/dashboard" text="Enter the pool" />
                 <InteractiveHoverButton href="#how" text="How a draw works" variant="ghost" />
               </div>
 
@@ -145,7 +164,7 @@ export default async function Home() {
             </section>
 
             {/* ────────────────────────────────────── live draw panel ── */}
-            <section data-hero-panel className="mt-20">
+            <section data-hero-panel id="pool" className="mt-20 scroll-mt-28">
               <div className="flex items-baseline justify-between">
                 <p className="eyebrow over-field">
                   {state
@@ -206,14 +225,13 @@ export default async function Home() {
           </h2>
           <div className="mt-8 grid gap-8 sm:grid-cols-2">
             <p className="text-[0.875rem] leading-relaxed text-muted">
-              On a transparent chain, every deposit and every balance is readable. So capital watches the pool, arrives
-              a block before the draw, takes odds proportional to a balance it held for minutes, and leaves immediately
-              after. It collects lottery odds without ever really saving.
+              On a normal blockchain everyone can read every balance. So a large holder waits, drops money in just
+              before the draw, gets odds to match, and pulls it straight back out afterwards. They take the same chance
+              of winning as someone who saved all year, without ever really saving.
             </p>
             <p className="text-[0.875rem] leading-relaxed text-muted">
-              The people who actually save pay for that. PoolTogether needed a time-weighted balance to survive it, and
-              even then the strategy is visible to anyone willing to read the chain. Tenure removes both halves of the
-              problem: the information the sniper reads, and the payoff they read it for.
+              Real savers pay for that. Tenure takes away both halves of the problem at once: the balances they read,
+              and the reward for reading them.
             </p>
           </div>
         </Reveal>
@@ -231,26 +249,26 @@ export default async function Home() {
             Four moves, and only two of them are public.
           </h2>
           <p className="mt-6 max-w-[62ch] text-[0.875rem] leading-relaxed text-muted">
-            Nothing here asks you to trust an operator with a number. Every phase can be advanced by anyone, and every
-            phase that can stall has a timeout that anyone can trigger.
+            Nobody has to be trusted with the result. Anyone can push the draw to its next step, and if it ever gets
+            stuck, anyone can reset it.
           </p>
 
           <div className="mt-12 grid gap-x-10 gap-y-8 sm:grid-cols-2">
             <Step index="01" title="Deposit">
-              Your amount is encrypted in the browser before it reaches the chain, and stays a ciphertext balance from
-              the moment it lands. It is withdrawable in every phase of every draw. There is no lock-up.
+              Your amount is encrypted in your browser before it is sent, so the chain never sees the figure. You can
+              withdraw at any point in any draw. Nothing is locked up.
             </Step>
             <Step index="02" title="Build the ladder">
-              Each saver is given a ticket range whose width is their balance, shifted by their tenure tier. The ranges
-              are computed over ciphertext, in batches, so the pool is not capped by what fits in one transaction.
+              Everyone gets a range of ticket numbers as wide as their balance, stretched by how long they have held.
+              This is worked out without ever decrypting anything, and in batches, so the pool can be any size.
             </Step>
             <Step index="03" title="Draw">
-              The protocol generates randomness on-chain and reduces it against the published total. The winning number
-              becomes public. Every ticket range stays encrypted, so the number cannot be traced to a person.
+              A random number is drawn on-chain and published. Everyone&apos;s ticket range stays encrypted, so the
+              number cannot be traced back to a person.
             </Step>
             <Step index="04" title="Claim">
-              Everyone claims the same way and everyone receives an encrypted result, so claiming reveals nothing. You
-              decrypt your own outcome with your own signature, and disclose it only if you want to.
+              Everyone claims the same way and everyone gets an encrypted answer, so claiming gives nothing away. You
+              decrypt your own result yourself, and tell people only if you want to.
             </Step>
           </div>
         </Reveal>
@@ -268,8 +286,8 @@ export default async function Home() {
             The boundary, stated plainly.
           </h2>
           <p className="mt-6 max-w-[62ch] text-[0.875rem] leading-relaxed text-muted">
-            Confidentiality claims are easy to make and hard to keep once money moves. This is the exact line, including
-            the parts that are less flattering.
+            Privacy is easy to promise and hard to keep once money moves. Here is the exact line, including the parts
+            that do not flatter us.
           </p>
 
           <div className="mt-12 grid gap-10 sm:grid-cols-2">
@@ -305,7 +323,7 @@ export default async function Home() {
         </Reveal>
 
         {/* ──────────────────────────────────────────── 05 tenure ── */}
-        <Reveal as="section" className="mt-28 sm:mt-36">
+        <Reveal as="section" id="tenure" className="mt-28 scroll-mt-28 sm:mt-36">
           <p>
             <span className="section-index">05</span>
             <span aria-hidden className="mx-2.5 text-line-bright">
@@ -317,9 +335,9 @@ export default async function Home() {
             Odds that come into focus.
           </h2>
           <p className="mt-6 max-w-[62ch] text-[0.875rem] leading-relaxed text-muted">
-            Encryption removes what the sniper reads. Tenure removes what they read it for. Hold across an epoch
-            boundary and your odds double; hold four and they are eight times what they started at. Any deposit or
-            withdrawal resets you to the beginning, so there is no way to hold dust and then arrive large.
+            Hold through one draw and your odds double. Hold through four and they are eight times what they started at.
+            Any deposit or withdrawal puts you back to the start, so you cannot sit on small change for months and then
+            turn up with a large balance.
           </p>
 
           <div className="mt-12">
@@ -330,9 +348,8 @@ export default async function Home() {
           </div>
 
           <p className="mt-8 max-w-[62ch] text-[0.875rem] leading-relaxed text-muted">
-            The multiplier is a deployment parameter rather than a rule baked into the contract. Set every tier to the
-            same value and Tenure reduces exactly to strict deposit-weighting — canonical PoolTogether — which is
-            asserted in the test suite rather than merely claimed here.
+            The multipliers are a setting, not something welded into the contract. Make them all equal and Tenure
+            behaves exactly like an ordinary prize pool. A test proves that, rather than us just saying it.
           </p>
         </Reveal>
 
@@ -353,24 +370,69 @@ export default async function Home() {
             <div className="hairline pt-5">
               <h3 className="text-[1rem] text-clear">Principal is never locked</h3>
               <p className="mt-2.5 text-[0.875rem] leading-relaxed text-muted">
-                Withdrawal works in all five phases of a draw, including while the ladder is being built and while a
-                claim window is open. There is a test that fails loudly if that stops being true.
+                You can withdraw at every stage of a draw, no exceptions. A test fails loudly if that ever stops being
+                true.
               </p>
             </div>
             <div className="hairline pt-5">
               <h3 className="text-[1rem] text-clear">No operator to wait on</h3>
               <p className="mt-2.5 text-[0.875rem] leading-relaxed text-muted">
-                Every phase advances permissionlessly and none require a payment. Whoever pushes the machine forward
-                chooses the timing, never the outcome. If nobody does, a timeout releases it.
+                Anyone can move the draw along, and it costs nothing beyond gas. Whoever does it picks the timing, never
+                the result. If nobody does, a timeout frees it.
               </p>
             </div>
             <div className="hairline pt-5">
               <h3 className="text-[1rem] text-clear">Nothing can strand funds</h3>
               <p className="mt-2.5 text-[0.875rem] leading-relaxed text-muted">
-                A draw cannot start unless its prize is already funded, so a winner can never be credited from an empty
-                pool. Every stall has an escape, and every escape rolls the prize forward.
+                A draw cannot start until its prize is already paid in, so a winner is never promised money that is not
+                there. Every way of getting stuck has a way out, and each one carries the prize to the next draw.
               </p>
             </div>
+          </div>
+        </Reveal>
+
+        {/* ──────────────────────────────────────────────── faq ── */}
+        <Reveal as="section" id="faq" className="mt-28 scroll-mt-28 sm:mt-36">
+          <p>
+            <span className="section-index">07</span>
+            <span aria-hidden className="mx-2.5 text-line-bright">
+              ·
+            </span>
+            <span className="eyebrow">Questions</span>
+          </p>
+          <h2 className="display mt-6 max-w-[20ch] text-[clamp(1.875rem,4.6vw,2.9375rem)]">
+            The things people ask first.
+          </h2>
+
+          <div className="mt-12">
+            <Faq q="Can I lose my deposit?">
+              No. The prize comes from a separate pot, not from anyone&apos;s savings, so not winning costs you nothing.
+              Your money is yours the whole time and you can take it out at any point in a draw.
+            </Faq>
+            <Faq q="If the winning number is public, how is the winner hidden?">
+              Because the ticket ranges are not public. The number tells you where it landed on a line whose sections
+              are encrypted, so you can check the draw was honest without learning whose section it fell in.
+            </Faq>
+            <Faq q="Can the people who built this see my balance?">
+              No. It is encrypted on-chain and only your own key can open it. The pool does arithmetic on it without
+              ever decrypting it, which is the whole point of the technology underneath.
+            </Faq>
+            <Faq q="What is actually public, then?">
+              That a draw happened, how much the prize was, the total number of tickets, the winning number, and which
+              addresses took part. Amounts, individual ranges and results are not.
+            </Faq>
+            <Faq q="Why do my odds reset when I add money?">
+              Otherwise you could hold a tiny balance for months to build up a multiplier, then top up to a large one
+              right before a draw and get the best of both. Resetting is what closes that door.
+            </Faq>
+            <Faq q="Is this real money?">
+              No. It runs on Sepolia, a test network, with test tokens you can mint for free. Nothing here is worth
+              anything, and it has not been audited by anyone outside the project.
+            </Faq>
+            <Faq q="What if nobody runs the draw?">
+              Anyone can run it, and it costs nothing but gas. If it stalls anyway, anyone can reset it after a timeout
+              and the prize carries into the next draw. Your deposit is never caught up in it.
+            </Faq>
           </div>
         </Reveal>
 
@@ -381,11 +443,11 @@ export default async function Home() {
               Try it on Sepolia. No real money, no sign-up.
             </h2>
             <p className="mt-5 max-w-[58ch] text-[0.875rem] leading-relaxed text-muted">
-              Mint the test token from the faucet built into the app, deposit an encrypted amount, and decrypt your own
-              balance with a single signature. Everything above this line needed no wallet at all.
+              Get the test token from the button in the app, deposit an encrypted amount, and read your own balance back
+              with one signature. Everything above this line needed no wallet at all.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <InteractiveHoverButton href="/app" text="Enter the pool" />
+              <InteractiveHoverButton href="/dashboard" text="Enter the pool" />
               <a
                 href="https://github.com/Sam-Rytech/Tenure"
                 className="btn btn-ghost"
@@ -398,51 +460,7 @@ export default async function Home() {
           </div>
         </Reveal>
 
-        {/* ───────────────────────────────────────────── footer ── */}
-        <footer className="mt-24 hairline pt-8">
-          <div className="grid gap-8 sm:grid-cols-2">
-            <div>
-              <p className="eyebrow">Deployed on Sepolia</p>
-              <ul className="mt-4 space-y-2 font-mono text-xs text-muted">
-                <li>
-                  pool{" "}
-                  <a
-                    className="text-clear underline-offset-4 transition-colors hover:text-glow hover:underline"
-                    href={addressUrl(ADDRESSES.pool)}
-                  >
-                    {shorten(ADDRESSES.pool, 10, 8)}
-                  </a>
-                </li>
-                <li>
-                  reserve{" "}
-                  <a
-                    className="text-clear underline-offset-4 transition-colors hover:text-glow hover:underline"
-                    href={addressUrl(ADDRESSES.reserve)}
-                  >
-                    {shorten(ADDRESSES.reserve, 10, 8)}
-                  </a>
-                </li>
-                <li>
-                  cUSDC{" "}
-                  <a
-                    className="text-clear underline-offset-4 transition-colors hover:text-glow hover:underline"
-                    href={addressUrl(ADDRESSES.cusdc)}
-                  >
-                    {shorten(ADDRESSES.cusdc, 10, 8)}
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <p className="eyebrow">About</p>
-              <p className="mt-4 max-w-[46ch] text-xs leading-relaxed text-muted">
-                Testnet only. Built on the Zama Protocol for the Zama Developer Program. Prizes come from an
-                admin-funded reserve rather than a live yield source, which the brief permits; a real adapter plugs in
-                behind the same function.
-              </p>
-            </div>
-          </div>
-        </footer>
+        <SiteFooter />
       </main>
     </>
   );

@@ -21,10 +21,23 @@ import { RPC_URL } from "@/lib/config";
  * avoids the SDK entirely.
  */
 
+/*
+ * Sepolia with its endpoint pinned to ours.
+ *
+ * Setting `transports` alone is not enough: anything that reads the chain definition rather than
+ * the config — and several libraries do — falls back to whatever public endpoint viem happens to
+ * ship that month. Overriding the definition means every path in this app, ours or a dependency's,
+ * ends up on the same endpoint we chose.
+ *
+ * It cannot govern the wallet. A wallet broadcasts through its own configured RPC, so if that one
+ * is refusing requests the fix is in the wallet's settings; `describeError` says so by name.
+ */
+const chain = { ...sepolia, rpcUrls: { default: { http: [RPC_URL] } } } as const;
+
 const wagmiConfig = createWagmiConfig({
-  chains: [sepolia],
+  chains: [chain],
   connectors: [injected()],
-  transports: { [sepolia.id]: http(RPC_URL) },
+  transports: { [chain.id]: http(RPC_URL) },
   ssr: true,
 });
 

@@ -82,7 +82,8 @@ const CONTRACT_ERRORS: Record<string, FriendlyError> = {
 function textOf(error: unknown): string {
   if (!error) return "";
   if (typeof error === "string") return error;
-  if (error instanceof Error) return `${error.name} ${error.message} ${String((error as { cause?: unknown }).cause ?? "")}`;
+  if (error instanceof Error)
+    return `${error.name} ${error.message} ${String((error as { cause?: unknown }).cause ?? "")}`;
   try {
     return JSON.stringify(error);
   } catch {
@@ -101,6 +102,24 @@ export function describeError(error: unknown): FriendlyError {
     return {
       title: "You rejected the request in your wallet",
       action: "Approve it to continue. Nothing was sent.",
+      retryable: true,
+    };
+  }
+
+  /*
+   * The wallet's own Sepolia endpoint refusing the request.
+   *
+   * This has to be tested before the wrong-network case below. The message that prompted it —
+   * "chain is not available on free plan" — contains the word "chain", so the network branch
+   * would otherwise catch it and send someone off to change a setting that is already correct.
+   */
+  if (/free plan|upgrade to paid|paid plan|exceeded.*quota|rate ?limit|too many requests|429/i.test(text)) {
+    return {
+      title: "Your wallet's Sepolia endpoint refused the request",
+      action:
+        "This is your wallet's own network setting rather than anything in Tenure. In MetaMask, open " +
+        "Settings, Networks, Sepolia, and set the RPC URL to https://ethereum-sepolia-rpc.publicnode.com. " +
+        "Then try again.",
       retryable: true,
     };
   }
@@ -124,8 +143,7 @@ export function describeError(error: unknown): FriendlyError {
   if (/operator|ERC7984UnauthorizedSpender|not authorized/i.test(text)) {
     return {
       title: "The pool is not yet your operator",
-      action:
-        "ERC-7984 uses operators rather than ERC-20 approvals. Grant the pool operator rights, then deposit.",
+      action: "ERC-7984 uses operators rather than ERC-20 approvals. Grant the pool operator rights, then deposit.",
       retryable: true,
     };
   }

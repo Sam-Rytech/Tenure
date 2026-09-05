@@ -161,9 +161,21 @@ float meteors(vec2 uv){
     // h runs 0 at the tip of the tail to 1 at the head, so the streak narrows and dims behind it.
     // Integer powers rather than pow(): the exponent is constant and pow is not cheap on a phone.
     float h2 = h * h;
-    float w = max(mix(0.0015, 0.0072, h), px * 1.1);
-    float core = smoothstep(w, 0.0, d) * h2;
-    float glow = smoothstep(w * 5.0 + max(0.0045, px * 3.0), 0.0, d) * h2 * h * 0.5;
+
+    /*
+     * The floor is two pixels, not one.
+     *
+     * A streak whose whole width is a single pixel has nowhere to put its own gradient: the edge
+     * lands on one sample or the next as it moves, and a diagonal line drawn that way steps
+     * instead of sliding. Two pixels is the minimum that can carry a soft edge, and on a canvas
+     * that is upscaled to the display it is what stops the trail looking chiselled.
+     */
+    float w = max(mix(0.0018, 0.0075, h), px * 2.0);
+
+    // A separate constant band at the edge, so the falloff does not get thinner as the tail does.
+    float aa = px * 0.9;
+    float core = smoothstep(w + aa, max(w - aa, 0.0), d) * h2;
+    float glow = smoothstep(w * 5.0 + max(0.0050, px * 3.5), 0.0, d) * h2 * h * 0.5;
 
     acc += (core + glow) * mFade[i];
   }
@@ -403,10 +415,13 @@ class ShaderField {
       this.seg[o + 2] = headX - dx * len;
       this.seg[o + 3] = headY - dy * len;
 
-      // Ease in and out of the wrap so a star never appears or vanishes on a hard edge.
-      const inFade = Math.min(1, cycle / 0.05);
-      const outFade = Math.min(1, (1 - cycle) / 0.05);
-      this.fade[i] = Math.min(inFade, outFade);
+      // Ease in and out of the wrap so a star never appears or vanishes on a hard edge. Linear
+      // ramps still read as a switch at the ends; smoothstepping them removes the click.
+      const ramp = (x: number) => {
+        const c = Math.min(1, Math.max(0, x / 0.09));
+        return c * c * (3 - 2 * c);
+      };
+      this.fade[i] = Math.min(ramp(cycle), ramp(1 - cycle));
     }
   }
 

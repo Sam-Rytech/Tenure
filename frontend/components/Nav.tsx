@@ -11,7 +11,7 @@ import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button
  * It condenses once the hero is behind you, which is the one piece of state the nav needs to
  * carry: whether you are still being pitched to, or already reading.
  */
-export function Nav({ cta = { href: "/app", label: "Enter the pool" } }: { cta?: { href: string; label: string } }) {
+export function Nav({ cta = { href: "/dashboard", label: "Enter the pool" } }: { cta?: { href: string; label: string } }) {
   const [condensed, setCondensed] = useState(false);
 
   useEffect(() => {

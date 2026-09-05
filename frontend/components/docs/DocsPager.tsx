@@ -59,7 +59,7 @@ export function DocsPager() {
               just the happy one.
             </p>
             <div className="mt-5 flex flex-wrap gap-3 sm:justify-end">
-              <InteractiveHoverButton href="/app" text="Enter the pool" />
+              <InteractiveHoverButton href="/dashboard" text="Enter the pool" />
               <a
                 href="https://github.com/Sam-Rytech/Tenure"
                 className="btn btn-ghost"
