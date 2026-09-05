@@ -184,9 +184,12 @@ listed it as the first cut; that was backwards.
 - **The keeper died mid-claims** on a relayer connect timeout, after the draw was already published and p1 had claimed.
   Nothing on-chain was left inconsistent — the draw stands on its own — and the remaining claims were completed
   separately, so `docs/cycle-sepolia.json` records the whole run.
-- **A docs page**, at `/docs`. Ten sections behind a sticky contents that tracks reading position, becoming a jump menu
-  below the sidebar breakpoint rather than a shrunken rail. Nothing on it animates in: the landing page argues,
-  documentation gets read in a hurry, and content waiting on a scroll trigger is content that can fail to arrive.
+- **Docs, at `/docs`** — ten routes rather than one long page, with previous and next at the foot of each so it can be
+  read straight through. Order and grouping live in one map that the sidebar, the jump menu and the pager all read, so
+  they cannot drift apart when a page moves. Below the sidebar breakpoint the contents becomes a native `select` rather
+  than a shrunken rail, inheriting the platform's picker and keyboard handling. Nothing animates in: the landing page
+  argues, documentation gets read in a hurry, and content waiting on a scroll trigger is content that can fail to
+  arrive.
 - **Type scale down one notch** across every page — body 15px to 14px, headings and leads to match. The 11px and 12px
   tokens were left where they were, since that is the size their contrast was measured at.
 - **Found while doing it:** the deposit amount input was 14px, and iOS Safari zooms the whole page when a field under
