@@ -209,5 +209,17 @@ listed it as the first cut; that was backwards.
   and positions of all fourteen stars — was being recomputed for every pixel, roughly a hundred thousand times a frame.
   It moved to the CPU. Measured on this machine: 2.25ms a frame at the phone's configuration, against 2.68ms for the old
   one that had six stars and one dust layer.
+- **The app crashed the moment a wallet connected**, and had done since the panel was written. `useDecryptValues` takes
+  `{ encryptedValue, contractAddress }` and was being handed `{ handle, contractAddress }`. The SDK builds its query key
+  during render and sorts on `encryptedValue.localeCompare`, so the missing property threw synchronously inside render
+  and React unwound the whole tree.
+- **Why it type-checked is the part worth keeping.** `@zama-fhe/react-sdk`'s own declarations import `EncryptedInput`
+  from `@zama-fhe/sdk/query/user-decrypt`, which is not an exported subpath of that package. Under bundler resolution
+  the import fails, `skipLibCheck` swallows it, and the parameter degrades to `any` — so a wrong property name passed a
+  clean type check and a clean production build. The same shape is exported from the root as `DecryptInput`, which does
+  resolve; naming it makes the old bug a compile error again.
+- **A second bug underneath it:** a fresh account has no ciphertext and the pool returns a zero handle, which is a
+  truthy string, so it was being sent to the relayer to decrypt. Zero handles are filtered out and shown as zero. It is
+  not a secret, and it should not cost a signature to learn that nothing is nothing.
 - **Blockers:** none on my side. Remaining work is the video and publishing the thread. The phone rendering still needs
   checking on a real device; I can only measure it here.

@@ -20,6 +20,18 @@ import {
   useGrantPermit,
   useHasPermit,
 } from "@zama-fhe/react-sdk";
+import { isEncryptedValueZero } from "@zama-fhe/sdk";
+/*
+ * Imported from the package's own subpath rather than inferred.
+ *
+ * `useDecryptValues` is declared as taking `EncryptedInput[]`, but the react package's types
+ * import that name from "@zama-fhe/sdk/query/user-decrypt", which is not an exported subpath of
+ * that package at all. Under bundler resolution the import fails, `skipLibCheck` swallows the
+ * failure, and the parameter silently becomes `any`. This file passed the wrong property name
+ * to it with a clean type check and a clean build. The same shape is exported from the root as
+ * `DecryptInput`, which does resolve, so naming it puts the check back.
+ */
+import type { DecryptInput } from "@zama-fhe/sdk";
 
 import { TENURE_POOL_ABI, ERC20_ABI, CUSDC_ABI } from "@/lib/abi";
 import {
@@ -140,10 +152,23 @@ export function WalletPanel() {
   const { data: hasPermit } = useHasPermit({ contractAddresses: [ADDRESSES.pool] });
   const { mutateAsync: grantPermit, isPending: granting } = useGrantPermit();
 
-  const decryptInputs = useMemo(() => {
-    const inputs: { handle: `0x${string}`; contractAddress: `0x${string}` }[] = [];
-    if (balanceHandle) inputs.push({ handle: balanceHandle as `0x${string}`, contractAddress: ADDRESSES.pool });
-    if (prizeHandle) inputs.push({ handle: prizeHandle as `0x${string}`, contractAddress: ADDRESSES.pool });
+  /*
+   * An account that has never held a position has no ciphertext, and the pool returns a zero
+   * handle for it. A zero handle is a perfectly truthy string, so it used to be handed to the
+   * relayer, which has nothing to decrypt — and it is not a secret in any case: a zero handle
+   * means zero. Both are shown directly rather than spending a signature to learn them.
+   */
+  const balanceIsZero = typeof balanceHandle === "string" && isEncryptedValueZero(balanceHandle);
+  const prizeIsZero = typeof prizeHandle === "string" && isEncryptedValueZero(prizeHandle);
+
+  const decryptInputs = useMemo<DecryptInput[]>(() => {
+    const inputs: DecryptInput[] = [];
+    if (typeof balanceHandle === "string" && !isEncryptedValueZero(balanceHandle)) {
+      inputs.push({ encryptedValue: balanceHandle as `0x${string}`, contractAddress: ADDRESSES.pool });
+    }
+    if (typeof prizeHandle === "string" && !isEncryptedValueZero(prizeHandle)) {
+      inputs.push({ encryptedValue: prizeHandle as `0x${string}`, contractAddress: ADDRESSES.pool });
+    }
     return inputs;
   }, [balanceHandle, prizeHandle]);
 
@@ -153,8 +178,8 @@ export function WalletPanel() {
     isFetching: revealing,
   } = useDecryptValues(decryptInputs, { enabled: false });
 
-  const clearBalance = balanceHandle ? cleartexts?.[balanceHandle as `0x${string}`] : undefined;
-  const clearPrize = prizeHandle ? cleartexts?.[prizeHandle as `0x${string}`] : undefined;
+  const clearBalance = balanceIsZero ? 0n : balanceHandle ? cleartexts?.[balanceHandle as `0x${string}`] : undefined;
+  const clearPrize = prizeIsZero ? 0n : prizeHandle ? cleartexts?.[prizeHandle as `0x${string}`] : undefined;
 
   // --- operator -----------------------------------------------------------
   const { data: isOperator, refetch: refetchOperator } = useConfidentialIsOperator({
@@ -247,6 +272,8 @@ export function WalletPanel() {
 
   async function revealBalances() {
     setError(null);
+    // Nothing encrypted to read yet, so there is nothing worth a signature.
+    if (decryptInputs.length === 0) return;
     try {
       if (!hasPermit) await grantPermit([ADDRESSES.pool]);
       await reveal();
@@ -296,6 +323,9 @@ export function WalletPanel() {
     );
   }
 
+  // With no ciphertext there is nothing to decrypt, so the control says so instead of doing nothing.
+  const nothingToReveal = decryptInputs.length === 0;
+
   const shift = accountInfo ? Number(accountInfo[3]) : 0;
   const enrolled = accountInfo ? Boolean(accountInfo[2]) : false;
 
@@ -329,11 +359,13 @@ export function WalletPanel() {
         </Row>
         <Row label="tenure multiplier">{enrolled ? tierLabelForShift(shift) : "—"}</Row>
         <div className="border-t border-line pt-4">
-          <Button busy={revealing || granting} onClick={revealBalances}>
+          <Button busy={revealing || granting} disabled={nothingToReveal} onClick={revealBalances}>
             {clearBalance === undefined ? "Reveal my balance" : "Refresh"}
           </Button>
           <p className="mt-2 text-xs leading-relaxed text-muted">
-            Signs a decryption request in your wallet. The signature is cached, so this is asked once.
+            {nothingToReveal
+              ? "Nothing encrypted to read yet. Deposit, and your balance becomes a ciphertext only you can open."
+              : "Signs a decryption request in your wallet. The signature is cached, so this is asked once."}
           </p>
         </div>
       </div>
