@@ -30,7 +30,7 @@ import { useEffect, useRef } from "react";
  */
 
 /** A moment with streaks mid-flight, used for the single frame drawn when motion is off. */
-const SEED_TIME = 16;
+const SEED_TIME = 20;
 
 const VERTEX_SRC = `#version 300 es
 precision mediump float;
@@ -43,7 +43,7 @@ precision mediump float;
 out vec4 O;
 uniform vec2 resolution;
 uniform float time;
-uniform float quality;   // 1.0 desktop, 0.0 phones: drops the second dust layer
+uniform float quality;   // 1.0 desktop, 0.0 phones: fewer dust layers and fewer shooting stars
 uniform vec3 paper;
 uniform vec3 cream;
 uniform vec3 gold;
@@ -118,28 +118,47 @@ float dust(vec2 uv, float scale, float speed, float t){
  * meteor. The intertwining comes from several stars on differing straight headings crossing one
  * another, which is also how it looks in the sky, not from any single one weaving.
  *
- * Cheaper than the curved version too: one segment per star instead of a five-segment polyline.
+ * All of them enter from the left and travel right, but their heights are spread across the whole
+ * field and their phases are staggered, so at any moment some are entering, some are mid-flight
+ * and some are leaving — anywhere in the frame rather than in one corner.
  */
 float meteors(vec2 uv, float t){
   float acc = 0.0;
 
-  for (int i = 0; i < 4; i++){
+  // Phones run six rather than nine. The loop body is cheap, but it runs per fragment on top of
+  // the noise field, and a phone is already the tightest budget on the page.
+  int count = quality > 0.5 ? 9 : 6;
+
+  for (int i = 0; i < 9; i++){
+    if (i >= count) break;
     float fi = float(i);
     float s1 = hash(vec2(fi, 1.7));
     float s2 = hash(vec2(fi, 9.3));
     float s3 = hash(vec2(fi, 4.1));
+    // A fourth seed, so the height is not correlated with the phase.
+    float s4 = hash(vec2(fi, 21.9));
 
     // A modest spread of headings, all rightward, so the paths cross rather than run parallel.
-    float ang = mix(-0.40, 0.28, s3);
+    float ang = mix(-0.30, 0.22, s3);
     vec2 dir = vec2(cos(ang), sin(ang));
 
-    float speed = 0.15 + 0.11 * s1;
+    float speed = 0.13 + 0.10 * s1;
     float cycle = fract(t * speed + s2);
 
-    vec2 start = vec2(-1.9, mix(-0.50, 0.60, s2));
-    vec2 head = start + dir * (cycle * 3.9);
+    /*
+     * Enter just off the left edge and cross a little past the right. The height is chosen for
+     * the midpoint of the flight, not the entry, and the rise or fall over the first half is
+     * subtracted back off: a star on a climbing heading that entered at the chosen height would
+     * spend most of its cycle above the frame, which is why only two or three were ever visible
+     * at once. Centring the path keeps every star sweeping through the band it was assigned.
+     *
+     * Nine of them, because each is visible for only the middle ~60% of its cycle and they are
+     * dimmer than they were when confined above the text; nine keeps three or four in frame.
+     */
+    vec2 start = vec2(-1.35, mix(-0.52, 0.52, s4) - dir.y * 1.35);
+    vec2 head = start + dir * (cycle * 2.7);
 
-    float len = 0.40 + 0.26 * s1;
+    float len = 0.34 + 0.22 * s1;
     vec2 tail = head - dir * len;
 
     vec2 pa = uv - tail, ba = head - tail;
@@ -151,7 +170,7 @@ float meteors(vec2 uv, float t){
     float core = smoothstep(w, 0.0, d) * pow(h, 2.2);
     float glow = smoothstep(w * 5.0 + 0.0045, 0.0, d) * pow(h, 3.0) * 0.5;
 
-    float fade = smoothstep(0.0, 0.05, cycle) * smoothstep(1.0, 0.92, cycle);
+    float fade = smoothstep(0.0, 0.06, cycle) * smoothstep(1.0, 0.94, cycle);
     acc += (core + glow) * fade;
   }
   return acc;
@@ -175,9 +194,13 @@ void main(void){
   if (quality > 0.5) motes += dust(uv, 15.0, 0.16, time + 40.0) * 0.75;
   col = mix(col, gold, clamp(motes, 0.0, 1.0) * 0.55);
 
+  /*
+   * Meteors are no longer confined to the upper half, so one can pass behind the 11px secondary
+   * text. Measured against the darkest tone the field itself produces, a 0.36 blend leaves that
+   * text at 4.58:1 — still clear of the AA floor — where 0.6 would have dropped it to 4.0.
+   */
   vec3 deepGold = gold * 0.82;
-  float streakZone = smoothstep(-0.06, 0.30, uv.y);
-  col = mix(col, deepGold, clamp(meteors(uv, time), 0.0, 1.0) * 0.6 * streakZone);
+  col = mix(col, deepGold, clamp(meteors(uv, time), 0.0, 1.0) * 0.36);
 
   // Settle back toward flat paper at the edges so the panel has no visible boundary.
   float vignette = smoothstep(1.85, 0.05, length(uv * vec2(0.66, 1.0)));
