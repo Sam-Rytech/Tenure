@@ -178,4 +178,17 @@ listed it as the first cut; that was backwards.
   time now. And the keeper funded the prize once at startup, but finalizing an epoch advances the counter, so the next
   `closeEpoch` reverted with `PrizeNotFunded` — funding now happens immediately before each close.
 - **Disk was full** (0 bytes of 238G). Cleared `frontend/.next` at 1.1GB and the npm cache at 2.2GB.
+- **Fresh cycle for the recording, epoch 3.** Total 8,000,000 against 1,000,000 of deposits — every saver has now held
+  across four boundaries, so the whole pool sits at the top 8x tier and the multiplier is as visible as it gets. W
+  523,794, one winner, winner balance 2,300,000. README and thread carry these numbers.
+- **The keeper died mid-claims** on a relayer connect timeout, after the draw was already published and p1 had claimed.
+  Nothing on-chain was left inconsistent — the draw stands on its own — and the remaining claims were completed
+  separately, so `docs/cycle-sepolia.json` records the whole run.
+- **A docs page**, at `/docs`. Ten sections behind a sticky contents that tracks reading position, becoming a jump menu
+  below the sidebar breakpoint rather than a shrunken rail. Nothing on it animates in: the landing page argues,
+  documentation gets read in a hurry, and content waiting on a scroll trigger is content that can fail to arrive.
+- **Type scale down one notch** across every page — body 15px to 14px, headings and leads to match. The 11px and 12px
+  tokens were left where they were, since that is the size their contrast was measured at.
+- **Found while doing it:** the deposit amount input was 14px, and iOS Safari zooms the whole page when a field under
+  16px takes focus. It holds 16px on phones now and only shrinks where there is a pointer.
 - **Blockers:** none on my side. Remaining work is the video and publishing the thread.

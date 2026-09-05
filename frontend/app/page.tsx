@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import { Nav } from "@/components/Nav";
 import { Ladder } from "@/components/Ladder";
 import { Reveal, HeroChoreography } from "@/components/Reveal";
@@ -15,7 +13,7 @@ function Stat({ label, value, tone = "clear" }: { label: string; value: string; 
   return (
     <div className="hairline pt-3">
       <dt className="eyebrow">{label}</dt>
-      <dd className={`mt-1.5 font-mono text-[0.9375rem] tabular-nums ${toneClass}`}>{value}</dd>
+      <dd className={`mt-1.5 font-mono text-[0.875rem] tabular-nums ${toneClass}`}>{value}</dd>
     </div>
   );
 }
@@ -24,8 +22,8 @@ function Step({ index, title, children }: { index: string; title: string; childr
   return (
     <div className="hairline pt-5">
       <span className="section-index">{index}</span>
-      <h3 className="display mt-3 text-[1.375rem] text-clear">{title}</h3>
-      <p className="mt-2.5 text-[0.9375rem] leading-relaxed text-muted">{children}</p>
+      <h3 className="display mt-3 text-[1.25rem] text-clear">{title}</h3>
+      <p className="mt-2.5 text-[0.875rem] leading-relaxed text-muted">{children}</p>
     </div>
   );
 }
@@ -55,8 +53,8 @@ function TierRow({
   return (
     <div className="flex items-center gap-4 border-t border-line py-4 sm:gap-6">
       <span className="w-10 shrink-0 font-mono text-[0.6875rem] text-muted-dim">{tier}</span>
-      <span className="w-24 shrink-0 text-sm text-muted sm:w-40">{held}</span>
-      <span className="w-14 shrink-0 font-mono text-2xl tabular-nums text-glow sm:text-3xl">{multiplier}</span>
+      <span className="w-24 shrink-0 text-[0.8125rem] text-muted sm:w-40">{held}</span>
+      <span className="w-14 shrink-0 font-mono text-[1.375rem] tabular-nums text-glow sm:text-2xl">{multiplier}</span>
       <span aria-hidden className="hidden min-w-0 flex-1 sm:block">
         <span className={`block h-2 rounded-[1px] bg-glow-bright ${blur}`} style={{ width: `${odds}%` }} />
       </span>
@@ -106,7 +104,7 @@ export default async function Home() {
                 <span className="eyebrow">Confidential prize savings</span>
               </p>
 
-              <h1 className="display mt-7 text-[clamp(2.75rem,9vw,5.5rem)]">
+              <h1 className="display mt-7 text-[clamp(2.5rem,8.2vw,5rem)]">
                 <span data-hero-line className="block">
                   Hold longer.
                 </span>
@@ -115,7 +113,7 @@ export default async function Home() {
                 </span>
               </h1>
 
-              <p data-hero-copy className="mt-7 max-w-[54ch] text-[1.0625rem] leading-relaxed text-muted">
+              <p data-hero-copy className="mt-7 max-w-[54ch] text-[1rem] leading-relaxed text-muted">
                 Deposit into a shared pool and the yield is drawn as a prize. Your balance is stored as ciphertext, your
                 odds rise the longer you hold, and your principal is never locked. Anyone can verify the draw was fair.
                 Nobody can work out who won.
@@ -165,7 +163,7 @@ export default async function Home() {
               {readError || !state ? (
                 <div className="panel mt-6 p-6">
                   <p className="eyebrow">Chain unreachable</p>
-                  <p className="mt-2.5 max-w-[60ch] text-[0.9375rem] leading-relaxed text-muted">
+                  <p className="mt-2.5 max-w-[60ch] text-[0.875rem] leading-relaxed text-muted">
                     The public Sepolia endpoint did not respond, so this draw cannot be shown right now. The contracts
                     are unaffected and the pool is still live. Reload in a moment.
                   </p>
@@ -203,16 +201,16 @@ export default async function Home() {
             </span>
             <span className="eyebrow">The problem</span>
           </p>
-          <h2 className="display mt-6 max-w-[18ch] text-[clamp(2rem,5vw,3.25rem)]">
+          <h2 className="display mt-6 max-w-[18ch] text-[clamp(1.875rem,4.6vw,2.9375rem)]">
             Public balances make prize savings easy to game.
           </h2>
           <div className="mt-8 grid gap-8 sm:grid-cols-2">
-            <p className="text-[0.9375rem] leading-relaxed text-muted">
+            <p className="text-[0.875rem] leading-relaxed text-muted">
               On a transparent chain, every deposit and every balance is readable. So capital watches the pool, arrives
               a block before the draw, takes odds proportional to a balance it held for minutes, and leaves immediately
               after. It collects lottery odds without ever really saving.
             </p>
-            <p className="text-[0.9375rem] leading-relaxed text-muted">
+            <p className="text-[0.875rem] leading-relaxed text-muted">
               The people who actually save pay for that. PoolTogether needed a time-weighted balance to survive it, and
               even then the strategy is visible to anyone willing to read the chain. Tenure removes both halves of the
               problem: the information the sniper reads, and the payoff they read it for.
@@ -229,10 +227,10 @@ export default async function Home() {
             </span>
             <span className="eyebrow">How a draw works</span>
           </p>
-          <h2 className="display mt-6 max-w-[20ch] text-[clamp(2rem,5vw,3.25rem)]">
+          <h2 className="display mt-6 max-w-[20ch] text-[clamp(1.875rem,4.6vw,2.9375rem)]">
             Four moves, and only two of them are public.
           </h2>
-          <p className="mt-6 max-w-[62ch] text-[0.9375rem] leading-relaxed text-muted">
+          <p className="mt-6 max-w-[62ch] text-[0.875rem] leading-relaxed text-muted">
             Nothing here asks you to trust an operator with a number. Every phase can be advanced by anyone, and every
             phase that can stall has a timeout that anyone can trigger.
           </p>
@@ -266,8 +264,10 @@ export default async function Home() {
             </span>
             <span className="eyebrow">What stays private</span>
           </p>
-          <h2 className="display mt-6 max-w-[20ch] text-[clamp(2rem,5vw,3.25rem)]">The boundary, stated plainly.</h2>
-          <p className="mt-6 max-w-[62ch] text-[0.9375rem] leading-relaxed text-muted">
+          <h2 className="display mt-6 max-w-[20ch] text-[clamp(1.875rem,4.6vw,2.9375rem)]">
+            The boundary, stated plainly.
+          </h2>
+          <p className="mt-6 max-w-[62ch] text-[0.875rem] leading-relaxed text-muted">
             Confidentiality claims are easy to make and hard to keep once money moves. This is the exact line, including
             the parts that are less flattering.
           </p>
@@ -275,7 +275,7 @@ export default async function Home() {
           <div className="mt-12 grid gap-10 sm:grid-cols-2">
             <div>
               <p className="eyebrow">Public — anyone can check</p>
-              <ul className="mt-4 space-y-3 text-[0.9375rem] text-clear">
+              <ul className="mt-4 space-y-3 text-[0.875rem] text-clear">
                 <li className="hairline pt-3">The weighted ticket total for each epoch</li>
                 <li className="hairline pt-3">The winning ticket number</li>
                 <li className="hairline pt-3">The prize amount and the epoch schedule</li>
@@ -284,7 +284,7 @@ export default async function Home() {
             </div>
             <div>
               <p className="eyebrow !text-glow">Encrypted — only you can read</p>
-              <ul className="mt-4 space-y-3 text-[0.9375rem] text-clear">
+              <ul className="mt-4 space-y-3 text-[0.875rem] text-clear">
                 <li className="hairline pt-3">Every individual balance</li>
                 <li className="hairline pt-3">Every individual ticket range</li>
                 <li className="hairline pt-3">Every pending prize, won or not</li>
@@ -295,7 +295,7 @@ export default async function Home() {
 
           <div className="panel mt-12 p-6 sm:p-8">
             <p className="eyebrow">What still leaks</p>
-            <p className="mt-3 max-w-[68ch] text-[0.9375rem] leading-relaxed text-muted">
+            <p className="mt-3 max-w-[68ch] text-[0.875rem] leading-relaxed text-muted">
               Participation is visible even though amounts are not. The weighted total loosely bounds how much is in the
               pool. With very few savers, an observer who already knows some balances can narrow the field — that is
               true of any pool. And because awards are encrypted, the contract itself cannot tell a winning claim from a
@@ -313,8 +313,10 @@ export default async function Home() {
             </span>
             <span className="eyebrow">Tenure</span>
           </p>
-          <h2 className="display mt-6 max-w-[20ch] text-[clamp(2rem,5vw,3.25rem)]">Odds that come into focus.</h2>
-          <p className="mt-6 max-w-[62ch] text-[0.9375rem] leading-relaxed text-muted">
+          <h2 className="display mt-6 max-w-[20ch] text-[clamp(1.875rem,4.6vw,2.9375rem)]">
+            Odds that come into focus.
+          </h2>
+          <p className="mt-6 max-w-[62ch] text-[0.875rem] leading-relaxed text-muted">
             Encryption removes what the sniper reads. Tenure removes what they read it for. Hold across an epoch
             boundary and your odds double; hold four and they are eight times what they started at. Any deposit or
             withdrawal resets you to the beginning, so there is no way to hold dust and then arrive large.
@@ -327,7 +329,7 @@ export default async function Home() {
             <TierRow tier="tier 3" held="held four or more" multiplier="8×" odds={100} blur="resolve-3" />
           </div>
 
-          <p className="mt-8 max-w-[62ch] text-[0.9375rem] leading-relaxed text-muted">
+          <p className="mt-8 max-w-[62ch] text-[0.875rem] leading-relaxed text-muted">
             The multiplier is a deployment parameter rather than a rule baked into the contract. Set every tier to the
             same value and Tenure reduces exactly to strict deposit-weighting — canonical PoolTogether — which is
             asserted in the test suite rather than merely claimed here.
@@ -343,28 +345,28 @@ export default async function Home() {
             </span>
             <span className="eyebrow">Built like infrastructure</span>
           </p>
-          <h2 className="display mt-6 max-w-[22ch] text-[clamp(2rem,5vw,3.25rem)]">
+          <h2 className="display mt-6 max-w-[22ch] text-[clamp(1.875rem,4.6vw,2.9375rem)]">
             A savings protocol should be boring everywhere except the draw.
           </h2>
 
           <div className="mt-12 grid gap-8 sm:grid-cols-3">
             <div className="hairline pt-5">
-              <h3 className="text-[1.0625rem] text-clear">Principal is never locked</h3>
-              <p className="mt-2.5 text-[0.9375rem] leading-relaxed text-muted">
+              <h3 className="text-[1rem] text-clear">Principal is never locked</h3>
+              <p className="mt-2.5 text-[0.875rem] leading-relaxed text-muted">
                 Withdrawal works in all five phases of a draw, including while the ladder is being built and while a
                 claim window is open. There is a test that fails loudly if that stops being true.
               </p>
             </div>
             <div className="hairline pt-5">
-              <h3 className="text-[1.0625rem] text-clear">No operator to wait on</h3>
-              <p className="mt-2.5 text-[0.9375rem] leading-relaxed text-muted">
+              <h3 className="text-[1rem] text-clear">No operator to wait on</h3>
+              <p className="mt-2.5 text-[0.875rem] leading-relaxed text-muted">
                 Every phase advances permissionlessly and none require a payment. Whoever pushes the machine forward
                 chooses the timing, never the outcome. If nobody does, a timeout releases it.
               </p>
             </div>
             <div className="hairline pt-5">
-              <h3 className="text-[1.0625rem] text-clear">Nothing can strand funds</h3>
-              <p className="mt-2.5 text-[0.9375rem] leading-relaxed text-muted">
+              <h3 className="text-[1rem] text-clear">Nothing can strand funds</h3>
+              <p className="mt-2.5 text-[0.875rem] leading-relaxed text-muted">
                 A draw cannot start unless its prize is already funded, so a winner can never be credited from an empty
                 pool. Every stall has an escape, and every escape rolls the prize forward.
               </p>
@@ -375,10 +377,10 @@ export default async function Home() {
         {/* ──────────────────────────────────────────────── cta ── */}
         <Reveal as="section" className="mt-28 sm:mt-36">
           <div className="panel p-8 sm:p-12">
-            <h2 className="display max-w-[16ch] text-[clamp(1.75rem,4vw,2.75rem)]">
+            <h2 className="display max-w-[16ch] text-[clamp(1.625rem,3.7vw,2.5rem)]">
               Try it on Sepolia. No real money, no sign-up.
             </h2>
-            <p className="mt-5 max-w-[58ch] text-[0.9375rem] leading-relaxed text-muted">
+            <p className="mt-5 max-w-[58ch] text-[0.875rem] leading-relaxed text-muted">
               Mint the test token from the faucet built into the app, deposit an encrypted amount, and decrypt your own
               balance with a single signature. Everything above this line needed no wallet at all.
             </p>

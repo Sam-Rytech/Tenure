@@ -181,8 +181,8 @@ Tag `@zama`, use `#ZamaDeveloperProgram`. Numbers below are from the real record
 
 **6/**
 
-> Here's a real one. 1,000,000 of deposits — but the published weighted total is 2,000,000, because every saver had held
-> long enough to reach the 2x tier. Winning number 420,467.
+> Here's a real one. 1,000,000 of deposits — but the published weighted total is 8,000,000, because every saver had held
+> long enough to reach the top 8x tier. Winning number 523,794.
 >
 > You can check that number landed correctly. You cannot tell whose range it landed in — the winner found out by
 > decrypting their own prize with an EIP-712 signature.

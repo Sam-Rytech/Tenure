@@ -33,23 +33,29 @@ export function Nav({ cta = { href: "/app", label: "Enter the pool" } }: { cta?:
       >
         <Link href="/" className="flex items-center gap-2.5 rounded-[2px]">
           <span aria-hidden className="block h-2 w-2 rounded-full bg-glow" />
-          <span className="display text-[1.0625rem] tracking-tight text-clear">Tenure</span>
+          <span className="display text-[1rem] tracking-tight text-clear">Tenure</span>
         </Link>
 
         <div className="flex items-center gap-1 sm:gap-3">
           <Link
             href="/#how"
-            className="hidden rounded-[2px] px-3 py-2 text-sm text-muted transition-colors hover:text-clear sm:block"
+            className="hidden rounded-[2px] px-3 py-2 text-[0.8125rem] text-muted transition-colors hover:text-clear sm:block"
           >
             How it works
           </Link>
           <Link
             href="/#privacy"
-            className="hidden rounded-[2px] px-3 py-2 text-sm text-muted transition-colors hover:text-clear sm:block"
+            className="hidden rounded-[2px] px-3 py-2 text-[0.8125rem] text-muted transition-colors hover:text-clear sm:block"
           >
             What stays private
           </Link>
-          <InteractiveHoverButton href={cta.href} text={cta.label} className="px-5 text-sm" />
+          <Link
+            href="/docs"
+            className="rounded-[2px] px-3 py-2 text-[0.8125rem] text-muted transition-colors hover:text-clear"
+          >
+            Docs
+          </Link>
+          <InteractiveHoverButton href={cta.href} text={cta.label} className="px-5 text-[0.8125rem]" />
         </div>
       </nav>
     </header>

@@ -55,7 +55,7 @@ export function Ladder({ total, winningNumber, drawn, epoch, compact = false }: 
             style={{ left: `${clamped}%` }}
           >
             <span className="eyebrow whitespace-nowrap !text-[0.625rem]">winning number</span>
-            <span className="mt-1 font-mono text-xl leading-none tabular-nums text-clear sm:text-2xl">
+            <span className="mt-1 font-mono text-xl leading-none tabular-nums text-clear sm:text-[1.375rem]">
               {winningNumber.toLocaleString("en-US")}
             </span>
             <span aria-hidden className="mt-2 block h-6 w-px bg-clear" />
@@ -98,7 +98,7 @@ export function Ladder({ total, winningNumber, drawn, epoch, compact = false }: 
       </div>
 
       {!compact && (
-        <figcaption className="mt-5 max-w-[62ch] text-[0.9375rem] leading-relaxed text-muted">
+        <figcaption className="mt-5 max-w-[62ch] text-[0.875rem] leading-relaxed text-muted">
           {drawn && hasAxis ? (
             <>
               The axis is public — {total.toLocaleString("en-US")} weighted tickets and a winning number anyone can

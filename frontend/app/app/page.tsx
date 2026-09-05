@@ -17,7 +17,7 @@ function Stat({ label, value, tone = "clear" }: { label: string; value: string; 
   return (
     <div className="hairline pt-3">
       <dt className="eyebrow">{label}</dt>
-      <dd className={`mt-1.5 font-mono text-[0.9375rem] tabular-nums ${tone === "glow" ? "text-glow" : "text-clear"}`}>
+      <dd className={`mt-1.5 font-mono text-[0.875rem] tabular-nums ${tone === "glow" ? "text-glow" : "text-clear"}`}>
         {value}
       </dd>
     </div>
@@ -44,8 +44,8 @@ export default async function AppPage() {
             {state ? `Epoch ${state.currentEpoch} · ${PHASE_LABELS[state.phase] ?? "unknown"}` : "Sepolia"}
           </span>
         </p>
-        <h1 className="display mt-5 text-[clamp(2.25rem,6vw,3.25rem)]">The pool</h1>
-        <p className="mt-5 max-w-[58ch] text-[0.9375rem] leading-relaxed text-muted">
+        <h1 className="display mt-5 text-[clamp(2rem,5.5vw,2.9375rem)]">The pool</h1>
+        <p className="mt-5 max-w-[58ch] text-[0.875rem] leading-relaxed text-muted">
           Testnet only. Mint the test token, grant the pool operator rights, then deposit an encrypted amount. Your
           balance is readable by you alone, and your principal comes out whenever you ask for it.
         </p>

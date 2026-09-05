@@ -94,5 +94,105 @@
   {
     "step": "winner balance",
     "note": "1300000 (stake 300000 + prize 1000000)"
+  },
+  {
+    "step": "decrypt permit window",
+    "note": "starts 1788603612, 1 day"
+  },
+  {
+    "step": "p1 already enrolled",
+    "note": "0x0bBcCC7044797619A862B9e2a3a8f0ca5A965feB"
+  },
+  {
+    "step": "p2 already enrolled",
+    "note": "0x07954c8F3a62cE869b1F7Bf49D1C174a2887449f"
+  },
+  {
+    "step": "p3 already enrolled",
+    "note": "0x0560c93d72458949dE11602d03550A2d0CCB4B3a"
+  },
+  {
+    "step": "finalizeEpoch(2)",
+    "hash": "0x22d576f26814a726391684907bb40cc0f242df36c5fc300407363aed6a29043f"
+  },
+  {
+    "step": "mint underlying (epoch 3)",
+    "hash": "0x5c250aecd39ff1c49a06793424242639632a59d179d0650d5975f4e6bd4a361b"
+  },
+  {
+    "step": "approve reserve",
+    "hash": "0xd45cc190ab5fc39edef1da947189a800500c4fc6780b879900477555b89d59eb"
+  },
+  {
+    "step": "fundEpoch(3)",
+    "hash": "0xd8e510389ce25f4ad0d4db547aab8546fdf406abf43badec777ef7791c0a5a61"
+  },
+  {
+    "step": "closeEpoch(3)",
+    "hash": "0x504f17251f8e13441e472eb144c1c952dba8f5eb4df98c768a443c2efa3c82c7"
+  },
+  {
+    "step": "buildChunk(3)",
+    "hash": "0x7a0479d5ac65e6379cf864220a0da3b9353500a17555afcef7eeb215559aee9c"
+  },
+  {
+    "step": "submitTotal(3) decrypted",
+    "note": "value=8000000"
+  },
+  {
+    "step": "submitTotal(3)",
+    "hash": "0x4218cd6d676179cfddb72d3652d56770ff71e3fa946071a94ba3bb206a677e6e"
+  },
+  {
+    "step": "submitWinner(3) decrypted",
+    "note": "value=523794"
+  },
+  {
+    "step": "submitWinner(3)",
+    "hash": "0x54dd1bbc212193cd9466ffa89dc1c2b7327b9a5e0fdddb23281ec19e529a7c8c"
+  },
+  {
+    "step": "published total",
+    "note": "8000000"
+  },
+  {
+    "step": "published winning number",
+    "note": "523794"
+  },
+  {
+    "step": "p1 claimPrize",
+    "hash": "0x521a2331114a5628b8910a28bdebf00ec026c30173ef90d22607b561c574c807"
+  },
+  {
+    "step": "p1 pendingPrize",
+    "note": "1000000"
+  },
+  {
+    "step": "p2 claimPrize",
+    "hash": "0xa62ad8484e571e9e4fb73880c91f125b95ff9ee92c4b63621191992ce4d4c408"
+  },
+  {
+    "step": "p2 pendingPrize",
+    "note": "0"
+  },
+  {
+    "step": "p3 claimPrize",
+    "hash": "0x8ca4eafa955b41e0942c784869f7263798961e0be819c36301cf74750f3bc157"
+  },
+  {
+    "step": "p3 pendingPrize",
+    "note": "0"
+  },
+  {
+    "step": "winner",
+    "note": "p1 0x0bBcCC7044797619A862B9e2a3a8f0ca5A965feB"
+  },
+  {
+    "step": "winner withdrawPrize",
+    "hash": "0x9ec1d9fa41c70e0b3f50a31ecbe891bea5cfe4e4ce845cd428c8084e10ed457f"
+  },
+  {
+    "step": "winner balance",
+    "note": "2300000 (stake 300000 + prize 1000000 + prize carried from epoch 2)"
   }
 ]

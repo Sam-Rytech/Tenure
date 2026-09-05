@@ -97,7 +97,7 @@ const InteractiveHoverButton = React.forwardRef<HTMLButtonElement, InteractiveHo
 
     const classes = cn(
       "group relative inline-flex min-h-[44px] cursor-pointer items-center justify-center overflow-hidden",
-      "rounded-full border px-6 text-[0.9375rem] font-medium leading-none",
+      "rounded-full border px-6 text-[0.875rem] font-medium leading-none",
       "transition-colors duration-200",
       surface[variant],
       className,

@@ -218,24 +218,24 @@ constants; a production deployment would use hours for the stall timeout and day
 ### A verified draw
 
 One complete three-participant cycle, run on Sepolia. Three savers deposited 300,000, 200,000 and 500,000 base units and
-had each held across an epoch boundary, so every stake counted at the 2x tenure tier: the published weighted total is
-**2,000,000** against 1,000,000 of deposits. That doubling is the tenure multiplier, visible on-chain rather than merely
-described.
+had each held across four epoch boundaries, so every stake counted at the top 8x tenure tier: the published weighted
+total is **8,000,000** against 1,000,000 of deposits. That eightfold gap is the tenure multiplier, visible on-chain
+rather than merely described.
 
 | Step                       | Transaction                                                                                                         |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| Fund the epoch prize       | [`0x26eb3a5a…`](https://sepolia.etherscan.io/tx/0x26eb3a5ab0dd1d99a9c227163f6555ed18d7ac7d8c6fe7bf75b7d6efcaf8d165) |
-| Close the epoch            | [`0x55248619…`](https://sepolia.etherscan.io/tx/0x5524861962346ca3ee21edf0bb997dd541d9c4a28c71600e4c04950f33e30e83) |
-| Build the encrypted ladder | [`0x444cff70…`](https://sepolia.etherscan.io/tx/0x444cff7012dbb3e96593e7293fe04678402a66e08fafe2a377997c4304cce563) |
-| Publish total, draw `W`    | [`0x688bca58…`](https://sepolia.etherscan.io/tx/0x688bca58cacb4936ea7b645ec3704ee73aa7f54cba59d7b363852cb222253311) |
-| Publish the winning number | [`0x14bbab61…`](https://sepolia.etherscan.io/tx/0x14bbab610b9d3261251bf4e5011605eb569ccfae249d21786060f711a462bb73) |
-| Winner claims              | [`0x1130c2d3…`](https://sepolia.etherscan.io/tx/0x1130c2d3acee4236fcc659662cf27e927ffc7a50086cdcf478f359db7bfae69c) |
-| Winner banks the prize     | [`0x70b35207…`](https://sepolia.etherscan.io/tx/0x70b35207b4461e1e92cb39c7ed8a02738177f9ff0521593b6705f6f00728d961) |
+| Fund the epoch prize       | [`0xd8e51038…`](https://sepolia.etherscan.io/tx/0xd8e510389ce25f4ad0d4db547aab8546fdf406abf43badec777ef7791c0a5a61) |
+| Close the epoch            | [`0x504f1725…`](https://sepolia.etherscan.io/tx/0x504f17251f8e13441e472eb144c1c952dba8f5eb4df98c768a443c2efa3c82c7) |
+| Build the encrypted ladder | [`0x7a0479d5…`](https://sepolia.etherscan.io/tx/0x7a0479d5ac65e6379cf864220a0da3b9353500a17555afcef7eeb215559aee9c) |
+| Publish total, draw `W`    | [`0x4218cd6d…`](https://sepolia.etherscan.io/tx/0x4218cd6d676179cfddb72d3652d56770ff71e3fa946071a94ba3bb206a677e6e) |
+| Publish the winning number | [`0x54dd1bbc…`](https://sepolia.etherscan.io/tx/0x54dd1bbc212193cd9466ffa89dc1c2b7327b9a5e0fdddb23281ec19e529a7c8c) |
+| Winner claims              | [`0x521a2331…`](https://sepolia.etherscan.io/tx/0x521a2331114a5628b8910a28bdebf00ec026c30173ef90d22607b561c574c807) |
+| Winner banks the prize     | [`0x9ec1d9fa…`](https://sepolia.etherscan.io/tx/0x9ec1d9fa41c70e0b3f50a31ecbe891bea5cfe4e4ce845cd428c8084e10ed457f) |
 
-Published total **2,000,000**. Published winning number **420,467**, which falls in the first range. All three
+Published total **8,000,000**. Published winning number **523,794**, which falls in the first range. All three
 participants claimed and decrypted their own results: `1,000,000`, `0` and `0` — exactly one winner, identifiable only
-by that participant decrypting their own handle. The winner's balance became 1,300,000: their 300,000 stake plus the
-1,000,000 prize.
+by that participant decrypting their own handle. The winner's balance became 2,300,000: their 300,000 stake plus this
+prize and the one they had already won in an earlier epoch.
 
 Every transaction from the run is recorded in [`docs/cycle-sepolia.json`](docs/cycle-sepolia.json).
 
