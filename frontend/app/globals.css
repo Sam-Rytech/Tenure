@@ -71,6 +71,38 @@ html {
   scroll-padding-top: 6rem;
 }
 
+/*
+ * One notch smaller on phones.
+ *
+ * Every size on the site is in rem, so moving the root moves the whole scale at once and keeps
+ * every proportion the design was tuned at. Two things are pinned back afterwards: the 11px
+ * labels, which are already at the size their contrast was measured for, and the amount field,
+ * which iOS zooms the page for if it is under 16px.
+ */
+@media (max-width: 639px) {
+  html {
+    font-size: 15px;
+  }
+
+  .eyebrow,
+  .section-index {
+    font-size: 0.75rem; /* 11.25px — back to the measured floor */
+  }
+}
+
+/*
+ * A notch smaller on phones.
+ *
+ * Done once at the root rather than as a breakpoint on every size in the codebase: everything
+ * here is set in rem, so one number moves the whole scale and keeps its proportions. The form
+ * input opts out below, because a field under 16px makes iOS Safari zoom the page on focus.
+ */
+@media (max-width: 639px) {
+  html {
+    font-size: 15px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

@@ -35,7 +35,7 @@ export function DocsSidebar() {
           id="docs-jump"
           value={pathname}
           onChange={(e) => router.push(e.target.value)}
-          className="mt-1.5 w-full rounded-[2px] border border-line bg-raised px-3 py-2.5 text-base text-clear"
+          className="mt-1.5 w-full rounded-[2px] border border-line bg-raised px-3 py-2.5 text-[16px] text-clear"
         >
           {DOCS.map((group) => (
             <optgroup key={group.label} label={group.label}>

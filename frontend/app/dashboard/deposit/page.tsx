@@ -48,7 +48,7 @@ export default function Deposit() {
             value={amount}
             inputMode="decimal"
             onChange={(e) => setAmount(e.target.value)}
-            className="w-28 rounded-[2px] border border-line bg-raised px-3 py-2 font-mono text-base tabular-nums text-clear sm:text-[0.8125rem]"
+            className="w-28 rounded-[2px] border border-line bg-raised px-3 py-2 font-mono text-[16px] tabular-nums text-clear sm:text-[0.8125rem]"
           />
           <Button
             primary
