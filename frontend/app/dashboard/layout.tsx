@@ -1,6 +1,13 @@
+import type { Metadata } from "next";
+
 import { Nav } from "@/components/Nav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { DashboardTabs } from "@/components/dashboard/DashboardTabs";
+
+export const metadata: Metadata = {
+  title: "Your position — Tenure",
+  description: "Your encrypted balance, pending prize and tenure multiplier.",
+};
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (

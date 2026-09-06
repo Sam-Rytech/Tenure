@@ -32,7 +32,7 @@ export function ConnectGate({ pool }: { pool: Pool }) {
     return (
       <section>
         <p className="eyebrow">Wallet needed</p>
-        <h2 className="display mt-3 text-[1.375rem] text-clear">Connect a wallet to go further</h2>
+        <h1 className="display mt-3 text-[1.375rem] text-clear">Connect a wallet to go further</h1>
         <p className="mt-3 max-w-[58ch] text-[0.875rem] leading-relaxed text-muted">
           Everything on the overview is public and needs no wallet. These pages show your own encrypted balance, so
           there is nothing to show until one is connected.
@@ -60,7 +60,7 @@ export function ConnectGate({ pool }: { pool: Pool }) {
     return (
       <section>
         <p className="eyebrow">Wrong network</p>
-        <h2 className="display mt-3 text-[1.375rem] text-clear">Tenure runs on Sepolia</h2>
+        <h1 className="display mt-3 text-[1.375rem] text-clear">Tenure runs on Sepolia</h1>
         <p className="mt-3 max-w-[58ch] text-[0.875rem] leading-relaxed text-muted">
           Switch your wallet to Sepolia and this page will fill in. The chain id is {SEPOLIA_CHAIN_ID}.
         </p>
