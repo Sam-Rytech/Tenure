@@ -22,13 +22,17 @@ export default function Deposit() {
       <section>
         <p className="eyebrow">First, two setup steps</p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <Button busy={pool.busy} onClick={pool.getTestTokens}>
+          <Button busy={pool.busy} busyLabel={pool.step} onClick={pool.getTestTokens}>
             Get test cUSDC
           </Button>
           <Button busy={pool.settingOperator} disabled={pool.isOperator} onClick={pool.grantOperator}>
             {pool.isOperator ? "Pool can move your funds" : "Let the pool move funds"}
           </Button>
         </div>
+        <p className="mt-3 max-w-[62ch] text-xs leading-relaxed text-muted">
+          Getting test tokens is three transactions — mint, approve, then wrap — so your wallet will ask three times,
+          one after the other. Anything already done is skipped if you run it again.
+        </p>
         {!pool.isOperator && (
           <p className="mt-3 max-w-[62ch] text-xs leading-relaxed text-muted">
             The confidential token uses operators instead of the usual approvals. It looks like an approval but works

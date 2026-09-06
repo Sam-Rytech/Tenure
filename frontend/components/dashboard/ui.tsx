@@ -10,12 +10,15 @@ export function Button({
   onClick,
   disabled,
   busy,
+  busyLabel,
   primary = false,
 }: {
   children: React.ReactNode;
   onClick: () => void;
   disabled?: boolean;
   busy?: boolean;
+  /** Shown instead of "Working…" so a three-step action says which step it is on. */
+  busyLabel?: string | null;
   primary?: boolean;
 }) {
   return (
@@ -25,7 +28,7 @@ export function Button({
       disabled={disabled || busy}
       className={`btn ${primary ? "btn-primary" : "btn-ghost"} text-[0.8125rem]`}
     >
-      {busy ? "Working\u2026" : children}
+      {busy ? (busyLabel ?? "Working\u2026") : children}
     </button>
   );
 }

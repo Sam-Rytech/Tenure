@@ -2,7 +2,15 @@
 
 import { useMemo, useState } from "react";
 import { parseAbi } from "viem";
-import { useAccount, useChainId, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import {
+  useAccount,
+  useChainId,
+  useConfig,
+  useReadContract,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
+import { readContract, waitForTransactionReceipt } from "wagmi/actions";
 import {
   useConfidentialIsOperator,
   useConfidentialSetOperator,
@@ -45,6 +53,9 @@ export function usePool() {
 
   const [error, setError] = useState<unknown>(null);
   const [lastTx, setLastTx] = useState<`0x${string}` | null>(null);
+  /** What a multi-step action is currently doing, so a long wait is legible rather than a spinner. */
+  const [step, setStep] = useState<string | null>(null);
+  const config = useConfig();
 
   const onWrongNetwork = isConnected && chainId !== SEPOLIA_CHAIN_ID;
 
@@ -137,28 +148,75 @@ export function usePool() {
     }
   }
 
-  /** Mint the public test token, approve the wrapper, then wrap it into cUSDC. */
+  /**
+   * Mint the public test token, approve the wrapper, then wrap it into cUSDC.
+   *
+   * Each step waits to be mined before the next is sent, because each one genuinely depends on
+   * the one before: wrapping needs the tokens to exist and the allowance to be set. Firing all
+   * three at once — which is what this used to do — meant the wrap was simulated against a chain
+   * where the mint had not landed, so it reverted; and on a phone, where the second wallet prompt
+   * often never surfaces, the whole thing simply hung.
+   *
+   * Steps already satisfied are skipped, so a retry after a half-finished attempt costs one
+   * transaction rather than three.
+   */
   async function getTestTokens() {
-    await run(async () => {
-      await writeContractAsync({
+    setError(null);
+    try {
+      const held = (await readContract(config, {
         address: ADDRESSES.underlying,
         abi: erc20Abi,
-        functionName: "mint",
-        args: [address!, FAUCET_AMOUNT],
-      });
-      await writeContractAsync({
+        functionName: "balanceOf",
+        args: [address!],
+      })) as bigint;
+
+      if (held < FAUCET_AMOUNT) {
+        setStep("Minting test tokens · 1 of 3");
+        const hash = await writeContractAsync({
+          address: ADDRESSES.underlying,
+          abi: erc20Abi,
+          functionName: "mint",
+          args: [address!, FAUCET_AMOUNT],
+        });
+        setLastTx(hash);
+        await waitForTransactionReceipt(config, { hash });
+      }
+
+      const allowed = (await readContract(config, {
         address: ADDRESSES.underlying,
         abi: erc20Abi,
-        functionName: "approve",
-        args: [ADDRESSES.cusdc, FAUCET_AMOUNT],
-      });
-      return writeContractAsync({
+        functionName: "allowance",
+        args: [address!, ADDRESSES.cusdc],
+      })) as bigint;
+
+      if (allowed < FAUCET_AMOUNT) {
+        setStep("Approving the wrapper · 2 of 3");
+        const hash = await writeContractAsync({
+          address: ADDRESSES.underlying,
+          abi: erc20Abi,
+          functionName: "approve",
+          args: [ADDRESSES.cusdc, FAUCET_AMOUNT],
+        });
+        setLastTx(hash);
+        await waitForTransactionReceipt(config, { hash });
+      }
+
+      setStep("Wrapping into cUSDC · 3 of 3");
+      const hash = await writeContractAsync({
         address: ADDRESSES.cusdc,
         abi: cusdcAbi,
         functionName: "wrap",
         args: [address!, FAUCET_AMOUNT],
       });
-    });
+      setLastTx(hash);
+      await waitForTransactionReceipt(config, { hash });
+
+      await Promise.all([refetchAccount(), refetchOperator()]);
+    } catch (e) {
+      setError(e);
+    } finally {
+      setStep(null);
+    }
   }
 
   async function grantOperator() {
@@ -221,7 +279,8 @@ export function usePool() {
     address,
     isConnected,
     onWrongNetwork,
-    busy,
+    busy: busy || step !== null,
+    step,
     error,
     setError,
     lastTx,
