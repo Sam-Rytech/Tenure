@@ -500,11 +500,16 @@ export function ShaderBackground({ className = "" }: { className?: string }) {
     /*
      * Fragments to shade, whatever the screen.
      *
-     * Raised from 400k once the dust stopped sweeping nine cells per layer. The number is chosen
-     * so a tall phone hero and a wide desktop one cost about the same, which is what lets one set
-     * of quality decisions hold on both.
+     * Raised once the dust stopped sweeping nine cells per layer. The number is chosen so a tall
+     * phone hero and a wide desktop one cost about the same, which is what lets one set of quality
+     * decisions hold on both.
+     *
+     * It is set by the largest screen rather than the smallest. A budget tuned for a phone leaves
+     * a 1440p or 4K display stretching a small canvas three or four times over, which is the same
+     * softness the phone had — just arrived at from the other direction. Measured at 8ms a frame
+     * for a 1440p hero on this machine, inside the 16.7ms a 60fps capture allows.
      */
-    const BUDGET = 700_000;
+    const BUDGET = 1_200_000;
 
     const scaleFor = (width: number, height: number) => {
       const dpr = Math.min(window.devicePixelRatio || 1, 3);
