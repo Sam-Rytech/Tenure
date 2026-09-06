@@ -508,9 +508,9 @@ export function ShaderBackground({ className = "" }: { className?: string }) {
 
     const scaleFor = (width: number, height: number) => {
       const dpr = Math.min(window.devicePixelRatio || 1, 3);
-      // Buffer pixels per CSS pixel we would like, before the budget has its say.
-      const wanted = width < 640 ? 1.35 : width < 1280 ? 0.9 : 0.75;
-      let scale = Math.min(dpr, wanted);
+      // Aim for the same amount of stretching everywhere: about 1.4 physical pixels per rendered
+      // one, which is what a desktop was already getting and looks right.
+      let scale = Math.min(dpr, dpr / 1.4, 1.6);
 
       const fragments = width * height * scale * scale;
       if (fragments > BUDGET) scale *= Math.sqrt(BUDGET / fragments);
@@ -519,18 +519,19 @@ export function ShaderBackground({ className = "" }: { className?: string }) {
     };
 
     /*
-     * Motes across the viewport width.
+     * One value, every screen.
      *
-     * Fewer on a small screen, so each one is physically bigger. Matching the desktop count on a
-     * phone divides the same picture into a third of the space, and the motes come out at about
-     * two pixels — present in the buffer, invisible to a person holding the phone.
+     * There were per-breakpoint numbers here, and they were the reason a phone kept looking like
+     * a different page: I was drawing a different picture and then trying to make the different
+     * picture match. Twelve motes span the viewport width everywhere, so the field is the same
+     * composition at every size and only the resolution it is shaded at varies.
      */
-    const cellsFor = (width: number) => (width < 640 ? 5 : width < 1024 ? 8 : 12);
+    const CELLS_ACROSS = 12;
 
     const sync = () => {
       const rect = canvas.getBoundingClientRect();
       if (rect.width === 0 || rect.height === 0) return;
-      field.resize(rect.width, rect.height, scaleFor(rect.width, rect.height), cellsFor(rect.width));
+      field.resize(rect.width, rect.height, scaleFor(rect.width, rect.height), CELLS_ACROSS);
     };
 
     let running = false;
